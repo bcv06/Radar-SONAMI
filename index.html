@@ -1,0 +1,1165 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Radar SONAMI: monitor regulatorio y reputacional de la minería chilena.">
+<meta name="robots" content="noindex, nofollow">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Radar SONAMI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --ground:#EDF1F1; --surface:#FFFFFF; --surface-2:#F5F8F8; --surface-3:#E7EDEC;
+  --line:#D4DCDB; --line-soft:#E3EAE9;
+  --ink:#13201E; --ink-2:#485856; --ink-3:#7B8C8A;
+  --accent:#14544B; --accent-ink:#0E3F38; --accent-soft:#D9E8E5; --on-accent:#FFFFFF;
+  --crit:#9C2A1C; --crit-soft:#F6DFDB;
+  --alta:#A85F12; --alta-soft:#F8E9D4;
+  --media:#14544B; --media-soft:#D9E8E5;
+  --info:#5C6E75; --info-soft:#E4EAEC;
+  --shadow:0 1px 2px rgba(19,32,30,.06), 0 4px 14px rgba(19,32,30,.05);
+  --radius:10px;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --display:"Archivo","IBM Plex Sans",-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0C1312; --surface:#141D1C; --surface-2:#1A2524; --surface-3:#22302E;
+    --line:#293735; --line-soft:#1F2C2A;
+    --ink:#E9F0EE; --ink-2:#A2B2AF; --ink-3:#71827F;
+    --accent:#5BC1B0; --accent-ink:#8FD8CB; --accent-soft:#14302C; --on-accent:#08201D;
+    --crit:#EE7462; --crit-soft:#3A1A15;
+    --alta:#DDA04C; --alta-soft:#372613;
+    --media:#5BC1B0; --media-soft:#14302C;
+    --info:#8DA0A6; --info-soft:#212C2F;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.28);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0C1312; --surface:#141D1C; --surface-2:#1A2524; --surface-3:#22302E;
+  --line:#293735; --line-soft:#1F2C2A;
+  --ink:#E9F0EE; --ink-2:#A2B2AF; --ink-3:#71827F;
+  --accent:#5BC1B0; --accent-ink:#8FD8CB; --accent-soft:#14302C; --on-accent:#08201D;
+  --crit:#EE7462; --crit-soft:#3A1A15;
+  --alta:#DDA04C; --alta-soft:#372613;
+  --media:#5BC1B0; --media-soft:#14302C;
+  --info:#8DA0A6; --info-soft:#212C2F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 16px rgba(0,0,0,.28);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+button{font:inherit; color:inherit; cursor:pointer; border:none; background:none}
+
+.wrap{max-width:1140px; margin:0 auto; padding-inline:16px; padding-block:0 56px}
+
+/* ---------- header ---------- */
+.masthead{
+  position:sticky; top:env(safe-area-inset-top, 0px); z-index:40;
+  background:color-mix(in srgb, var(--ground) 92%, transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.masthead-in{
+  max-width:1140px; margin:0 auto; padding-inline:16px;
+  padding-block:12px; display:flex; flex-wrap:wrap; gap:12px 20px;
+  align-items:baseline; justify-content:space-between;
+}
+.brand{display:flex; align-items:baseline; gap:10px; min-width:0}
+.brand h1{
+  font-family:var(--display); font-weight:700; font-size:19px;
+  letter-spacing:-.015em; margin:0; white-space:nowrap;
+}
+.brand .sub{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--ink-3); white-space:nowrap;
+}
+.runmeta{display:flex; align-items:center; gap:14px; flex-wrap:wrap}
+.runmeta .stamp{font-family:var(--mono); font-size:11.5px; color:var(--ink-2)}
+.pulse{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:var(--mono); font-size:11px; letter-spacing:.05em;
+  text-transform:uppercase; color:var(--ink-2);
+}
+.pulse i{width:7px; height:7px; border-radius:50%; background:var(--accent); display:block}
+.pulse.stale i{background:var(--alta)}
+.pulse.off i{background:var(--ink-3)}
+
+/* ---------- hero counters ---------- */
+.topline{
+  display:grid; gap:1px; background:var(--line-soft);
+  border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+  grid-template-columns:repeat(4,1fr); margin-top:22px;
+}
+.topline .cell{background:var(--surface); padding:14px 16px}
+.topline .n{
+  font-family:var(--display); font-weight:700; font-size:30px; line-height:1;
+  letter-spacing:-.02em; font-variant-numeric:tabular-nums;
+}
+.topline .k{
+  font-family:var(--mono); font-size:10px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--ink-3); margin-top:7px;
+}
+.topline .cell.is-crit .n{color:var(--crit)}
+.topline .cell.is-alta .n{color:var(--alta)}
+
+/* ---------- section head ---------- */
+.shead{
+  display:flex; align-items:baseline; justify-content:space-between;
+  gap:12px; margin:30px 0 12px; flex-wrap:wrap;
+}
+.shead h2{
+  font-family:var(--display); font-weight:600; font-size:13px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--ink-2); margin:0;
+}
+.shead .hint{font-size:12px; color:var(--ink-3)}
+
+/* ---------- source tiles ---------- */
+.sources{display:grid; grid-template-columns:repeat(4,1fr); gap:8px}
+@media (max-width:720px){.sources{grid-template-columns:repeat(2,1fr)}}
+.src{
+  text-align:left; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:11px 12px 12px;
+  display:flex; flex-direction:column; gap:2px; transition:border-color .12s, background .12s;
+  position:relative;
+}
+.src:hover{border-color:var(--ink-3)}
+.src[aria-pressed="true"]{
+  border-color:var(--accent); background:var(--accent-soft);
+}
+.src .row1{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.src .nm{
+  font-family:var(--mono); font-size:10px; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--ink-2); line-height:1.3;
+}
+.src[aria-pressed="true"] .nm{color:var(--accent-ink)}
+.src .ct{
+  font-family:var(--display); font-weight:700; font-size:21px; line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.src .dsc{font-size:11.5px; color:var(--ink-3); line-height:1.35}
+.src .flag{
+  display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:6px; vertical-align:1px;
+}
+.src.err .flag{background:var(--alta)}
+.src .bar{display:flex; height:3px; border-radius:2px; overflow:hidden; margin-top:8px; background:var(--surface-3)}
+.src .bar span{display:block}
+
+/* ---------- filters ---------- */
+.filters{
+  display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+  margin:14px 0 0;
+}
+.seg{
+  display:inline-flex; background:var(--surface); border:1px solid var(--line);
+  border-radius:8px; overflow:hidden;
+}
+.seg button{
+  padding:6px 11px; font-size:12px; font-weight:500; color:var(--ink-2);
+  border-right:1px solid var(--line-soft);
+}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent)}
+.search{
+  flex:1 1 200px; min-width:160px; display:flex; align-items:center; gap:8px;
+  background:var(--surface); border:1px solid var(--line); border-radius:8px;
+  padding:0 10px;
+}
+.search input{
+  flex:1; border:none; background:none; outline:none; color:var(--ink);
+  font:inherit; font-size:13px; padding:7px 0; min-width:0;
+}
+.search input::placeholder{color:var(--ink-3)}
+.search svg{flex:none; opacity:.5}
+.clearall{
+  font-size:12px; color:var(--ink-3); text-decoration:underline;
+  text-underline-offset:3px; padding:6px 2px;
+}
+
+/* ---------- feed ---------- */
+.feed{display:flex; flex-direction:column; gap:8px; margin-top:12px}
+.daysep{
+  display:flex; align-items:center; gap:10px; margin:16px 0 4px;
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--ink-3);
+}
+.daysep::after{content:""; flex:1; height:1px; background:var(--line)}
+.daysep:first-child{margin-top:4px}
+
+.item{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:13px 15px 13px 16px;
+  position:relative; overflow:hidden;
+}
+.item::before{
+  content:""; position:absolute; left:0; top:0; bottom:0; width:3px; background:var(--info);
+}
+.item.k-critica::before{background:var(--crit)}
+.item.k-alta::before{background:var(--alta)}
+.item.k-media::before{background:var(--media)}
+
+.item .meta{
+  display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-bottom:6px;
+}
+.chip{
+  font-family:var(--mono); font-size:9.5px; letter-spacing:.08em;
+  text-transform:uppercase; padding:2.5px 6px; border-radius:4px;
+  background:var(--surface-3); color:var(--ink-2); white-space:nowrap;
+}
+.chip.sev{font-weight:500}
+.chip.sev.critica{background:var(--crit-soft); color:var(--crit)}
+.chip.sev.alta{background:var(--alta-soft); color:var(--alta)}
+.chip.sev.media{background:var(--media-soft); color:var(--media)}
+.chip.sev.info{background:var(--info-soft); color:var(--info)}
+.chip.org{background:transparent; border:1px solid var(--line); color:var(--ink-3)}
+.item .when{
+  font-family:var(--mono); font-size:10.5px; color:var(--ink-3);
+  margin-left:auto; white-space:nowrap;
+}
+.item h3{
+  font-family:var(--display); font-weight:600; font-size:15px; line-height:1.35;
+  margin:0 0 4px; letter-spacing:-.005em; text-wrap:balance;
+}
+.item h3 a{text-decoration:none}
+.item h3 a:hover{text-decoration:underline; text-underline-offset:2px}
+.item p{margin:0; font-size:13px; color:var(--ink-2); line-height:1.5; max-width:74ch}
+.item .tags{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px}
+.tag{
+  font-size:11px; color:var(--ink-3); background:var(--surface-2);
+  border:1px solid var(--line-soft); padding:1.5px 7px; border-radius:20px;
+}
+.item .ref{
+  font-family:var(--mono); font-size:11px; color:var(--ink-3); margin-top:7px;
+  display:flex; flex-wrap:wrap; gap:10px;
+}
+.item .ref a{color:var(--accent); text-decoration:none}
+.item .ref a:hover{text-decoration:underline}
+
+/* ---------- source status ---------- */
+.statusgrid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:1px;
+  background:var(--line-soft); border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden;
+}
+.st{background:var(--surface); padding:10px 13px; display:flex; gap:9px; align-items:flex-start}
+.st i{width:6px; height:6px; border-radius:50%; margin-top:6px; flex:none; background:var(--media)}
+.st.warn i{background:var(--alta)}
+.st.down i{background:var(--crit)}
+.st .t{font-size:12.5px; font-weight:500; line-height:1.3}
+.st .d{font-family:var(--mono); font-size:10.5px; color:var(--ink-3); margin-top:2px}
+
+/* ---------- empty / loading ---------- */
+.panel{
+  background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); padding:26px 22px; text-align:center;
+}
+.panel h3{font-family:var(--display); font-size:16px; margin:0 0 6px; font-weight:600}
+.panel p{margin:0 auto; max-width:52ch; color:var(--ink-2); font-size:13px}
+
+.btn{
+  display:inline-flex; align-items:center; gap:7px; font-size:12px; font-weight:500;
+  padding:6px 11px; border-radius:8px; border:1px solid var(--line); background:var(--surface);
+  color:var(--ink);
+}
+.btn:hover{border-color:var(--ink-3)}
+.btn:disabled{opacity:.5; cursor:default}
+.btn svg{flex:none}
+.toast{font-family:var(--mono); font-size:11px; color:var(--ink-3)}
+
+/* ---------- attention strip ---------- */
+.attn{
+  margin-top:14px; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--radius); overflow:hidden;
+}
+.attn-h{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:10px 14px; background:var(--crit-soft); color:var(--crit);
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.09em; text-transform:uppercase;
+}
+.attn ol{list-style:none; margin:0; padding:0}
+.attn li{display:grid; grid-template-columns:auto 1fr auto; gap:10px; align-items:baseline;
+  padding:9px 14px; border-top:1px solid var(--line-soft)}
+.attn li:first-child{border-top:none}
+.attn .who{font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap}
+.attn .what{font-size:13px; font-weight:500; line-height:1.4}
+.attn .what a{text-decoration:none}
+.attn .what a:hover{text-decoration:underline}
+.attn .d{font-family:var(--mono); font-size:10.5px; color:var(--ink-3); white-space:nowrap}
+
+/* ---------- topics ---------- */
+.topics{display:flex; flex-wrap:wrap; gap:6px}
+.topic{
+  font-size:12px; padding:4px 10px; border-radius:20px; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink-2); display:inline-flex; gap:6px; align-items:baseline;
+}
+.topic b{font-family:var(--mono); font-weight:500; font-size:10.5px; color:var(--ink-3)}
+.topic[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+.topic[aria-pressed="true"] b{color:var(--on-accent); opacity:.8}
+
+/* ---------- pending source ---------- */
+.src.pending{border-style:dashed}
+.src.pending .ct{display:block; margin-top:6px; font-size:10.5px; font-family:var(--mono); font-weight:500; letter-spacing:.05em; text-transform:uppercase; color:var(--alta)}
+.setup{
+  margin-top:10px; background:var(--surface); border:1px dashed var(--line);
+  border-radius:var(--radius); padding:14px 16px; font-size:12.5px; color:var(--ink-2);
+}
+.setup h4{margin:0 0 6px; font-family:var(--display); font-size:13.5px; color:var(--ink); font-weight:600}
+.setup ul{margin:6px 0 0; padding-left:18px}
+.setup li{margin:2px 0}
+.setup code{font-family:var(--mono); font-size:11.5px; background:var(--surface-3); padding:1px 5px; border-radius:4px}
+
+/* ---------- indicators ---------- */
+.ticker{
+  display:grid; grid-template-columns:repeat(7,1fr); gap:1px; margin-top:18px;
+  background:var(--line-soft); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+}
+.tk{background:var(--surface); padding:9px 12px 10px; min-width:0}
+.tk .l{font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.tk .v{font-family:var(--display); font-weight:600; font-size:17px; line-height:1.15; font-variant-numeric:tabular-nums; margin-top:3px; white-space:nowrap}
+.tk .u{font-family:var(--mono); font-size:10px; color:var(--ink-3); margin-left:3px; font-weight:400}
+.tk .d{font-family:var(--mono); font-size:10px; margin-top:1px; color:var(--ink-3)}
+.tk .d.up{color:var(--media)} .tk .d.dn{color:var(--crit)}
+.tickmeta{font-family:var(--mono); font-size:10px; color:var(--ink-3); margin-top:5px; text-align:right}
+@media (max-width:900px){.ticker{grid-template-columns:repeat(4,1fr)} .tk:last-child:nth-child(7){grid-column:span 2}}
+@media (max-width:520px){.ticker{grid-template-columns:repeat(2,1fr)}}
+
+/* ---------- opinion ---------- */
+.opinion{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+@media (max-width:720px){.opinion{grid-template-columns:1fr}}
+.op{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px}
+.op h3{margin:0 0 2px; font-family:var(--display); font-size:14px; font-weight:600}
+.op .sub{font-size:11.5px; color:var(--ink-3); margin-bottom:12px}
+.tonebar{display:flex; height:12px; border-radius:6px; overflow:hidden; background:var(--surface-3)}
+.tonebar span{display:block; height:100%}
+.tone-pos{background:var(--media)} .tone-neu{background:var(--info)} .tone-neg{background:var(--crit)}
+.tonelegend{display:flex; flex-wrap:wrap; gap:6px 16px; margin-top:10px; font-size:12px; color:var(--ink-2)}
+.tonelegend i{display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:6px; vertical-align:0}
+.tonelegend b{font-family:var(--mono); font-weight:500; font-variant-numeric:tabular-nums}
+.sov{display:flex; flex-direction:column; gap:7px}
+.sovrow{display:grid; grid-template-columns:110px 1fr 34px; gap:10px; align-items:center; font-size:12px}
+.sovrow .n{color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.sovrow .t{height:8px; background:var(--surface-3); border-radius:4px; overflow:hidden}
+.sovrow .t span{display:block; height:100%; background:var(--info); border-radius:4px}
+.sovrow.me .n{color:var(--ink); font-weight:600}
+.sovrow.me .t span{background:var(--accent)}
+.sovrow .c{font-family:var(--mono); font-size:11px; color:var(--ink-3); text-align:right; font-variant-numeric:tabular-nums}
+.op .empty{font-size:12px; color:var(--ink-3)}
+.negs{margin-top:14px; border-top:1px solid var(--line-soft); padding-top:10px}
+.negs .h{font-family:var(--mono); font-size:9.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--crit); margin-bottom:6px}
+.negs a, .negs span.t{display:block; font-size:12.5px; line-height:1.4; padding:3px 0; text-decoration:none; color:var(--ink)}
+.negs a:hover{text-decoration:underline}
+.negs em{font-style:normal; font-family:var(--mono); font-size:10px; color:var(--ink-3); margin-left:6px}
+.chip.tono{background:transparent; border:1px solid var(--line)}
+.chip.tono.positivo{color:var(--media); border-color:color-mix(in srgb, var(--media) 40%, transparent)}
+.chip.tono.negativo{color:var(--crit); border-color:color-mix(in srgb, var(--crit) 40%, transparent)}
+.chip.tono.neutro{color:var(--info)}
+
+/* ---------- distribution ---------- */
+.dist{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px 16px}
+.dist p{margin:0 0 10px; font-size:12.5px; color:var(--ink-2); max-width:70ch}
+.mails{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px}
+.mail{display:inline-flex; align-items:center; gap:6px; font-family:var(--mono); font-size:11.5px; padding:3px 4px 3px 9px; border-radius:20px; background:var(--surface-2); border:1px solid var(--line-soft)}
+.mail button{width:18px; height:18px; border-radius:50%; font-size:13px; line-height:1; color:var(--ink-3)}
+.mail button:hover{background:var(--surface-3); color:var(--crit)}
+.addmail{display:flex; gap:8px; flex-wrap:wrap}
+.addmail input{flex:1 1 220px; min-width:0; font:inherit; font-size:13px; padding:6px 10px; border:1px solid var(--line); border-radius:8px; background:var(--surface); color:var(--ink)}
+.addmail input:focus-visible, .btn:focus-visible, .src:focus-visible, .seg button:focus-visible, .topic:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.distmsg{font-size:11.5px; color:var(--ink-3); margin-top:6px; min-height:1em}
+
+/* ---------- clima ---------- */
+.clima{display:grid; grid-template-columns:repeat(5,1fr); gap:8px}
+@media (max-width:900px){.clima{grid-template-columns:repeat(3,1fr)}}
+@media (max-width:560px){.clima{grid-template-columns:1fr 1fr}}
+.cp{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:11px 12px}
+.cp.warn{border-color:color-mix(in srgb, var(--alta) 55%, var(--line))}
+.cp .pn{font-weight:600; font-size:12.5px; line-height:1.3}
+.cp .pr{font-family:var(--mono); font-size:9.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-3); margin-bottom:7px}
+.cp table{width:100%; border-collapse:collapse; font-family:var(--mono); font-size:10.5px; font-variant-numeric:tabular-nums}
+.cp td{padding:2px 0; color:var(--ink-2); white-space:nowrap}
+.cp td.dd{color:var(--ink-3)}
+.cp td.pp{text-align:right}
+.cp td.pp.wet{color:var(--media); font-weight:500}
+.cp .snow{color:var(--alta); font-weight:500}
+
+/* ---------- mirror ---------- */
+.mirrorbar{
+  margin-top:14px; padding:9px 14px; border-radius:var(--radius);
+  background:var(--accent-soft); color:var(--accent-ink); font-size:12.5px;
+}
+
+footer.note{
+  margin-top:34px; padding-top:16px; border-top:1px solid var(--line);
+  font-size:11.5px; color:var(--ink-3); line-height:1.6;
+}
+footer.note b{color:var(--ink-2); font-weight:500}
+
+@media (max-width:720px){
+  .topline{grid-template-columns:repeat(2,1fr)}
+  .attn li{grid-template-columns:1fr; gap:2px}
+  .brand h1{font-size:17px}
+  .brand .sub{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none!important; animation:none!important}
+}
+</style>
+
+
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-in">
+    <div class="brand">
+      <h1>Radar SONAMI</h1>
+      <span class="sub">Monitor regulatorio y reputacional</span>
+    </div>
+    <div class="runmeta">
+      <span class="pulse" id="pulse"><i></i><span id="pulseTxt">Conectando</span></span>
+      <span class="stamp" id="stamp">—</span>
+      <button class="btn" id="xlsxBtn" type="button" hidden>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M8 2v8m0 0l-3-3m3 3l3-3M3 13h10"/></svg>
+        Descargar Excel
+      </button>
+      <span class="toast" id="toast" aria-live="polite"></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="mirrorbar" id="mirrorbar" hidden></div>
+
+  <section class="ticker" id="ticker" hidden aria-label="Indicadores"></section>
+  <div class="tickmeta" id="tickmeta" hidden></div>
+
+  <section class="topline" id="topline">
+    <div class="cell"><div class="n" id="nTotal">—</div><div class="k">Hallazgos en vista</div></div>
+    <div class="cell is-crit"><div class="n" id="nCrit">—</div><div class="k">Críticos</div></div>
+    <div class="cell is-alta"><div class="n" id="nAlta">—</div><div class="k">Alta prioridad</div></div>
+    <div class="cell"><div class="n" id="nHoy">—</div><div class="k">Ingresados hoy</div></div>
+  </section>
+
+  <section class="attn" id="attn" hidden>
+    <div class="attn-h"><span>Requiere atención · últimos 7 días</span><span id="attnN"></span></div>
+    <ol id="attnList"></ol>
+  </section>
+
+  <div class="shead">
+    <h2>Fuentes</h2>
+    <span class="hint">Haz clic para filtrar. Vuelve a hacer clic para quitar el filtro.</span>
+  </div>
+  <div class="sources" id="sources"></div>
+
+  <div class="setup" id="rrssSetup" hidden>
+    <h4>Redes sociales: pendiente de conexión</h4>
+    El radar ya tiene reservado el canal para X, LinkedIn, Facebook e Instagram. Se activa al conectar una cuenta de captura (Apify, ~US$5–19/mes):
+    <ul>
+      <li><b>X/Twitter</b> — búsqueda de «SONAMI», «Jorge Riesco», «Carolina Vásquez» y @Sonami_Chile.</li>
+      <li><b>LinkedIn</b> — posts públicos que mencionen a SONAMI o a su directiva, más la página <code>/company/sonamichile</code>.</li>
+      <li><b>Facebook e Instagram</b> — posts públicos y hashtags (#sonami, #mineriachile, #pequeñamineria) y la actividad de <code>@sonamicl</code>.</li>
+    </ul>
+  </div>
+
+  <div class="shead">
+    <h2>Temas de la semana</h2>
+    <span class="hint">Etiquetas más frecuentes en el rango elegido. Clic para filtrar.</span>
+  </div>
+  <div class="topics" id="topics"></div>
+
+  <div class="shead">
+    <h2>Opinión pública</h2>
+    <span class="hint">Prensa, gremios, encuestas y redes en el rango elegido.</span>
+  </div>
+  <div class="opinion">
+    <div class="op">
+      <h3>Tono de la cobertura</h3>
+      <div class="sub" id="toneSub">Hacia la minería y SONAMI</div>
+      <div id="toneBox"></div>
+    </div>
+    <div class="op">
+      <h3>Presencia por actor</h3>
+      <div class="sub">Menciones en las que aparece cada actor</div>
+      <div class="sov" id="sovBox"></div>
+    </div>
+  </div>
+
+  <div id="climaZone" hidden>
+    <div class="shead">
+      <h2>Clima en faenas</h2>
+      <span class="hint" id="climaHint">Pronóstico a 3 días · máx/mín °C · precipitación mm</span>
+    </div>
+    <div class="clima" id="climaBox"></div>
+  </div>
+
+  <div class="filters">
+    <div class="seg" id="segRango" role="group" aria-label="Rango de fechas">
+      <button data-r="1">Hoy</button>
+      <button data-r="7" aria-pressed="true">7 días</button>
+      <button data-r="30">30 días</button>
+      <button data-r="0">Todo</button>
+    </div>
+    <div class="seg" id="segCrit" role="group" aria-label="Criticidad">
+      <button data-c="all" aria-pressed="true">Todas</button>
+      <button data-c="critica">Crítica</button>
+      <button data-c="alta">Alta</button>
+      <button data-c="media">Media</button>
+      <button data-c="info">Info</button>
+    </div>
+    <label class="search">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+      <input id="q" type="search" placeholder="Buscar título, empresa, región, rol, CVE…" autocomplete="off">
+    </label>
+    <button class="clearall" id="clearall" hidden>Limpiar filtros</button>
+  </div>
+
+  <div id="feedZone">
+    <div class="panel" id="loading"><h3>Cargando el radar…</h3><p>Leyendo los hallazgos almacenados.</p></div>
+  </div>
+
+  <div class="shead" id="statusHead" hidden><h2>Estado de las fuentes</h2><span class="hint">Última barrida automática</span></div>
+  <div class="statusgrid" id="statusgrid" hidden></div>
+
+  <section id="distZone" hidden>
+    <div class="shead"><h2>Correo diario</h2><span class="hint">Solo visible para editores del radar</span></div>
+    <div class="dist">
+      <p>Cada mañana, después de la barrida de las 09:30, se envía un resumen con los hallazgos críticos y el Excel adjunto a estas direcciones. No necesitan cuenta de Claude.</p>
+      <div class="mails" id="mails"></div>
+      <form class="addmail" id="addmail" autocomplete="off">
+        <input id="newmail" type="email" placeholder="nombre@empresa.cl" aria-label="Correo a agregar">
+        <button class="btn" type="submit">Agregar</button>
+      </form>
+      <div class="distmsg" id="distmsg" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <footer class="note">
+    <b>Cómo funciona.</b> Una tarea automática revisa cada hora las fuentes urgentes (alertas, sismos, prensa sobre SONAMI, hechos esenciales, tabla del Senado), a las 09:30 y 15:30 las importantes, y a las 09:30 hace la barrida completa. Solo escribe lo nuevo, deduplicado contra corridas anteriores; las alertas que terminan quedan marcadas como cerradas.
+    <b>Criticidad:</b> <em>Crítica</em> = afecta directamente a SONAMI, a un socio identificado o exige reacción el mismo día. <em>Alta</em> = normativa, causa o sanción del sector minero con impacto gremial. <em>Media</em> = seguimiento sectorial. <em>Info</em> = contexto.
+    <b>Cobertura.</b> Poder Judicial (pjud.cl) no es accesible de forma automatizada: se cubre vía los tres Tribunales Ambientales y el TDLC. La lista de reglamentos en toma de razón de Contraloría tampoco es legible de forma automática: se sigue por prensa especializada. Las redes sociales (X, LinkedIn, Facebook, Instagram) entran por un servicio de captura externo; mientras no esté conectado, su tarjeta aparece como «Por conectar».
+  </footer>
+</div>
+
+<script type="application/json" id="radar-data">{"publicado": "2026-09-23T08:45", "indicadores": {"fecha": "2026-09-22", "actualizado": "2026-09-22T15:00:00-03:00", "valores": [{"id": "cobre", "nombre": "Cobre", "valor": 6.6, "unidad": "US$/lb", "fuente": "mindicador.cl", "url": "https://mindicador.cl/api"}, {"id": "oro", "nombre": "Oro", "valor": 4328.6, "unidad": "US$/oz", "fuente": "gold-api.com", "url": "https://api.gold-api.com/price/XAU"}, {"id": "plata", "nombre": "Plata", "valor": 65.51, "unidad": "US$/oz", "fuente": "gold-api.com", "url": "https://api.gold-api.com/price/XAG"}, {"id": "molibdeno", "nombre": "Molibdeno", "valor": 42.01, "unidad": "US$/lb", "fuente": "dailymetalprice.com (referencial)", "url": "https://www.dailymetalprice.com/metalprices.php?c=mo&u=lb&d=1&x=USD"}, {"id": "litio", "nombre": "Litio (carbonato)", "valor": 19525, "unidad": "US$/t", "fuente": "Cochilco, promedio agosto", "url": "https://www.cochilco.cl/"}, {"id": "dolar", "nombre": "Dólar", "valor": 952.0, "unidad": "CLP", "fuente": "mindicador.cl", "url": "https://mindicador.cl/api/dolar"}, {"id": "uf", "nombre": "UF", "valor": 40991.75, "unidad": "CLP", "fuente": "mindicador.cl", "url": "https://mindicador.cl/api"}], "historia": {"cobre": [["2026-09-17", 6.53], ["2026-09-22", 6.6]], "dolar": [["2026-09-21", 958.42], ["2026-09-22", 952.0]]}}, "clima": {"fecha": "2026-09-22", "fuente": "MET Norway (api.met.no)", "puntos": [{"punto": "Calama / Chuquicamata", "region": "Antofagasta", "dias": [["2026-09-22", 24.7, 19.3, 0.0, 9.9], ["2026-09-23", 24.7, 9.0, 0.0, 9.2], ["2026-09-24", 24.9, 9.4, 0.0, 9.9]]}, {"punto": "Escondida", "region": "Antofagasta", "dias": [["2026-09-22", 18.4, 8.2, 0.0, 6.0], ["2026-09-23", 19.2, 5.5, 0.0, 5.9], ["2026-09-24", 20.7, 9.7, 0.0, 5.7]]}, {"punto": "Copiapó", "region": "Atacama", "dias": [["2026-09-22", 27.6, 19.4, 0.0, 4.0], ["2026-09-23", 27.4, 13.4, 0.0, 4.0], ["2026-09-24", 27.9, 14.0, 0.0, 4.2]]}, {"punto": "Andina / Los Bronces", "region": "Valparaíso · RM", "dias": [["2026-09-22", 0.6, -0.1, 0.1, 2.2], ["2026-09-23", -1.3, -4.4, 4.8, 3.1], ["2026-09-24", -1.2, -4.4, 0.0, 4.8]]}, {"punto": "El Teniente", "region": "O'Higgins", "dias": [["2026-09-22", 3.2, 1.3, 0.1, 2.3], ["2026-09-23", 2.1, 0.7, 10.8, 3.5], ["2026-09-24", 0.2, -1.5, 2.9, 5.3]]}]}, "dias": [{"fecha": "2026-09-22", "items": [{"fuente": "DO", "subfuente": "Boletín de Minería", "titulo": "22 nóminas de concesiones mineras para remate en la edición 44.555", "resumen": "La subsección «Nómina Concesiones para Remate» del Boletín Oficial de Minería del 22-09-2026 publica 22 nóminas de pertenencias a remate en Antofagasta, Atacama, RM, O'Higgins, Ñuble, Biobío, La Araucanía y Los Lagos. SONAMI pidió en septiembre suspender los remates mientras se tramita la reforma al amparo minero: el proceso siguió adelante.", "url": "https://www.boletinoficialdemineria.cl/?date=22-09-2026&edition=44555&subseccion=7107", "criticidad": "critica", "organismo": "Boletín Oficial de Minería / Tesorería General de la República", "region": "", "ref": "CVE-2871421 + 21 nóminas", "fechaFuente": "2026-09-22", "etiquetas": ["remates", "amparo minero", "concesiones"], "id": "9bf52fe024d1", "dia": "2026-09-22"}, {"fuente": "DO", "subfuente": "Boletín de Minería", "titulo": "54 pedimentos mineros en la edición del 22-09; 46 concentrados en Arauco", "resumen": "La edición 44.555 publica 54 pedimentos mineros (Antofagasta 4, Atacama 4, Biobío/Arauco 46) sin manifestaciones. Destaca la serie «LUNA 119-169» de un mismo titular en la provincia de Arauco: concentración anómala de solicitudes fuera de las zonas mineras tradicionales.", "url": "https://www.boletinoficialdemineria.cl/?date=22-09-2026&edition=44555", "criticidad": "info", "organismo": "Boletín Oficial de Minería", "region": "Biobío", "ref": "Edición 44.555", "fechaFuente": "2026-09-22", "etiquetas": ["pedimentos", "concesiones"], "id": "373854aac80b", "dia": "2026-09-22"}, {"fuente": "DO", "subfuente": "Normas Generales", "titulo": "RCA aprobada para la interconexión eléctrica Los Cóndores (CL) – Río Diamante (AR)", "resumen": "El SEA del Maule notifica la RCA del EIA de interconexión internacional privada. Precedente de tramitación ambiental para infraestructura energética transfronteriza y ampliación de la oferta de suministro disponible para consumo industrial y faenas.", "url": "https://www.diariooficial.interior.gob.cl/edicionelectronica/index.php?date=22-09-2026&edition=44555", "criticidad": "media", "organismo": "Ministerio del Medio Ambiente / SEA", "region": "Maule", "ref": "CVE-2872021 / Res. Ex. 202607001139", "fechaFuente": "2026-09-22", "etiquetas": ["energía", "permisología", "rca"], "id": "891a1a9e5124", "dia": "2026-09-22"}, {"fuente": "DO", "subfuente": "Normas Generales", "titulo": "Subsecretarios de Minería y Energía en comisión de servicio a Buenos Aires", "resumen": "El Decreto 29/2026 designa al Subsecretario de Minería Álvaro González Gorroño en comisión de servicio a Buenos Aires; el Decreto 21/2026 hace lo propio con el Subsecretario de Energía. Señal de agenda bilateral minero-energética con Argentina: litio, cobre e interconexión.", "url": "https://www.diariooficial.interior.gob.cl/edicionelectronica/index.php?date=22-09-2026&edition=44555", "criticidad": "media", "organismo": "Ministerio de Minería / Ministerio de Energía", "region": "", "ref": "CVE-2869801 / Decreto 29/2026", "fechaFuente": "2026-09-22", "etiquetas": ["institucional", "energía", "internacional"], "id": "6ae81668935a", "dia": "2026-09-22"}, {"fuente": "DO", "subfuente": "Normas Generales", "titulo": "Hacienda establece las bases de la política fiscal conforme a la ley 20.128", "resumen": "El Decreto 486 de 2026 fija las bases de la política fiscal del período. Marco de referencia del gasto y de los ingresos fiscales, donde el royalty y los aportes del cobre son componentes centrales del debate tributario sectorial.", "url": "https://www.diariooficial.interior.gob.cl/edicionelectronica/index.php?date=22-09-2026&edition=44555", "criticidad": "info", "organismo": "Ministerio de Hacienda", "region": "", "ref": "CVE-2870356 / Decreto 486/2026", "fechaFuente": "2026-09-22", "etiquetas": ["tributario", "royalty"], "id": "c895e245ae43", "dia": "2026-09-22"}, {"fuente": "DO", "subfuente": "Normas Generales", "titulo": "El SII implementa nuevas validaciones para la facturación electrónica", "resumen": "La Resolución exenta 121 de 2026 del SII establece validaciones adicionales en el sistema de facturación electrónica. Obligación de cumplimiento administrativo para todas las empresas mineras y sus proveedores.", "url": "https://www.diariooficial.interior.gob.cl/edicionelectronica/index.php?date=22-09-2026&edition=44555", "criticidad": "info", "organismo": "Ministerio de Hacienda / SII", "region": "", "ref": "CVE-2869888 / Res. Ex. 121/2026", "fechaFuente": "2026-09-22", "etiquetas": ["tributario", "cumplimiento"], "id": "27d219895b35", "dia": "2026-09-22"}, {"fuente": "SEA", "subfuente": "PAC abierta", "titulo": "PAC abierta: Modificación Depósito de Relaves Spence (Sierra Gorda)", "resumen": "Proyecto de modificación del depósito de relaves de Minera Spence abierto a solicitud de Participación Ciudadana, con plazo hasta el 15 de octubre de 2026. Precedente regulatorio sobre modificación de depósitos de relaves en la principal región minera del país.", "url": "https://www.sea.gob.cl/filter-content/proyectos_para_pac", "criticidad": "alta", "organismo": "Servicio de Evaluación Ambiental", "region": "Antofagasta", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["relaves", "permisología", "participación ciudadana"], "id": "62aa4f61b4aa", "dia": "2026-09-22"}, {"fuente": "SEA", "subfuente": "PAC abierta", "titulo": "PAC abierta: Reactivación Faena Minera Capacho Viejo (Tocopilla)", "resumen": "Solicitud de PAC vigente hasta el 15 de octubre de 2026 para la reactivación de una faena minera en Tocopilla. Caso típico de mediana minería socia del gremio donde la apertura de PAC alarga los plazos de tramitación.", "url": "https://www.sea.gob.cl/filter-content/proyectos_para_pac", "criticidad": "alta", "organismo": "Servicio de Evaluación Ambiental", "region": "Antofagasta", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["permisología", "mediana minería", "participación ciudadana"], "id": "c76b9a0bf52d", "dia": "2026-09-22"}, {"fuente": "SEA", "subfuente": "PAC abierta", "titulo": "PAC abierta: Desarrollo Minero Bloque Dorado (San Gregorio, Magallanes)", "resumen": "Proyecto de desarrollo minero en San Gregorio con PAC abierta hasta el 15 de octubre de 2026. Muestra la expansión de la evaluación con participación ciudadana a proyectos mineros fuera del eje norte.", "url": "https://www.sea.gob.cl/filter-content/proyectos_para_pac", "criticidad": "media", "organismo": "Servicio de Evaluación Ambiental", "region": "Magallanes", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["permisología", "participación ciudadana"], "id": "a0ec13ba13e8", "dia": "2026-09-22"}, {"fuente": "SEA", "subfuente": "PAC abierta", "titulo": "PAC abierta: Cierre del Pozo Lastrero – Minera Rosario (Puente Alto)", "resumen": "Plan de cierre de pozo lastrero de Minera Rosario sometido a PAC hasta el 15 de octubre de 2026. Referencia de exigencias de cierre de faenas en zona urbana de la Región Metropolitana.", "url": "https://www.sea.gob.cl/filter-content/proyectos_para_pac", "criticidad": "media", "organismo": "Servicio de Evaluación Ambiental", "region": "Metropolitana", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["cierre de faenas", "permisología", "participación ciudadana"], "id": "0d72732fac95", "dia": "2026-09-22"}, {"fuente": "SEA", "subfuente": "Reclamaciones", "titulo": "Tierras raras Biobío: 4 recursos de reclamación contra proyecto de US$130 millones", "resumen": "El proyecto de extracción de arcillas para concentrado de tierras raras (Biobío, US$130,0 millones) acumula 4 recursos de reclamación desde el 05-08-2026, en tramitación post RCA. Único proyecto propiamente minero judicializado en el tablero de reclamaciones; marca pauta para los minerales críticos.", "url": "https://recursos.sea.gob.cl/files/reports/dashboard_progreso_recursos_reclamacion.html", "criticidad": "alta", "organismo": "Servicio de Evaluación Ambiental", "region": "Biobío", "ref": "", "fechaFuente": "2026-08-05", "etiquetas": ["judicialización", "tierras raras", "permisología"], "id": "0708af16f7f1", "dia": "2026-09-22"}, {"fuente": "SEA", "subfuente": "Reclamaciones", "titulo": "Proyecto Aguas Marítimas (Antofagasta, US$5.000 millones) con 3 reclamaciones", "resumen": "EIA en Antofagasta por US$5.000 millones con 3 recursos de reclamación desde el 16-06-2026, en tramitación post RCA. Por su escala y ubicación es determinante para la disponibilidad hídrica de la industria minera regional.", "url": "https://recursos.sea.gob.cl/files/reports/dashboard_progreso_recursos_reclamacion.html", "criticidad": "media", "organismo": "Servicio de Evaluación Ambiental", "region": "Antofagasta", "ref": "", "fechaFuente": "2026-06-16", "etiquetas": ["agua", "judicialización", "permisología"], "id": "e98e407c9367", "dia": "2026-09-22"}, {"fuente": "SMA", "subfuente": "Registro de sanciones", "titulo": "Caserones (Minera Lumina Copper Chile): multa de 10.000 UTA, pagada", "resumen": "Expediente D-018-2019 del registro público de sanciones de la SMA: multa de 10.000 UTA —el tope legal— contra Minera Lumina Copper Chile por la unidad fiscalizable Caserones, Región de Atacama, ya pagada. Techo sancionatorio aplicable a la gran minería.", "url": "https://snifa.sma.gob.cl/RegistroPublico/Resultado/2026", "criticidad": "alta", "organismo": "Superintendencia del Medio Ambiente", "region": "Atacama", "ref": "D-018-2019", "fechaFuente": "2026-09-22", "etiquetas": ["fiscalización", "sanciones", "gran minería"], "id": "041bfee7712d", "dia": "2026-09-22"}, {"fuente": "SMA", "subfuente": "Registro de sanciones", "titulo": "Minera Escondida Limitada: multa de 10.000 UTA, pagada", "resumen": "Expediente D-099-2020 del registro público SNIFA: 10.000 UTA contra Minera Escondida Limitada (Antofagasta), estado Pagada. Junto con Caserones fija el estándar máximo de multa ambiental en minería.", "url": "https://snifa.sma.gob.cl/RegistroPublico/Resultado/2026", "criticidad": "alta", "organismo": "Superintendencia del Medio Ambiente", "region": "Antofagasta", "ref": "D-099-2020", "fechaFuente": "2026-09-22", "etiquetas": ["fiscalización", "sanciones", "gran minería"], "id": "4a77a4cb6d65", "dia": "2026-09-22"}, {"fuente": "SMA", "subfuente": "Registro de sanciones", "titulo": "Compañía Contractual Minera Candelaria: multa de 5.049 UTA, pagada", "resumen": "Expediente D-018-2015 del registro público de sanciones: 5.049 UTA contra Compañía Contractual Minera Candelaria, Región de Atacama, pagada. Tercera multa minera más alta del registro consultado.", "url": "https://snifa.sma.gob.cl/RegistroPublico/Resultado/2026", "criticidad": "alta", "organismo": "Superintendencia del Medio Ambiente", "region": "Atacama", "ref": "D-018-2015", "fechaFuente": "2026-09-22", "etiquetas": ["fiscalización", "sanciones", "gran minería"], "id": "5380eadeccfe", "dia": "2026-09-22"}, {"fuente": "SMA", "subfuente": "Registro de sanciones", "titulo": "Pampa Camarones S.A.: 3.575,9 UTA pendientes con convenio de pago", "resumen": "Expediente D-017-2013: multa de 3.575,90 UTA a Pampa Camarones S.A. (Arica y Parinacota) en estado «Pendiente con Convenio de Pago». Muestra el uso de convenios cuando la multa compromete la viabilidad de una faena mediana.", "url": "https://snifa.sma.gob.cl/RegistroPublico/Resultado/2026", "criticidad": "alta", "organismo": "Superintendencia del Medio Ambiente", "region": "Arica y Parinacota", "ref": "D-017-2013", "fechaFuente": "2026-09-22", "etiquetas": ["fiscalización", "sanciones", "mediana minería"], "id": "9e4b3fd88f55", "dia": "2026-09-22"}, {"fuente": "SMA", "subfuente": "Registro de sanciones", "titulo": "Minera Los Pelambres: dos sanciones vigentes (2.326 y 211,9 UTA), ambas pagadas", "resumen": "Expedientes D-011-2013 (2.326 UTA) y D-099-2022 (211,90 UTA) contra Minera Los Pelambres en la Región de Coquimbo, ambas pagadas. La reincidencia registrada en el mismo titular es un antecedente que pesa en futuros procedimientos sancionatorios.", "url": "https://snifa.sma.gob.cl/RegistroPublico/Resultado/2026", "criticidad": "alta", "organismo": "Superintendencia del Medio Ambiente", "region": "Coquimbo", "ref": "D-011-2013", "fechaFuente": "2026-09-22", "etiquetas": ["fiscalización", "sanciones", "reincidencia"], "id": "e3395fd97e41", "dia": "2026-09-22"}, {"fuente": "SMA", "subfuente": "Registro de sanciones", "titulo": "Codelco División El Teniente (Embalse Carén): multa de 302 UTA, pagada", "resumen": "Expediente D-033-2016 en SNIFA: 302 UTA contra Codelco Chile División El Teniente por el Embalse Carén, Región Metropolitana, pagada. Antecedente sobre manejo de depósitos y embalses de relaves en la zona central.", "url": "https://snifa.sma.gob.cl/RegistroPublico/Resultado/2026", "criticidad": "media", "organismo": "Superintendencia del Medio Ambiente", "region": "Metropolitana", "ref": "D-033-2016", "fechaFuente": "2026-09-22", "etiquetas": ["relaves", "fiscalización", "sanciones"], "id": "ef29b7ffac6f", "dia": "2026-09-22"}, {"fuente": "SMA", "subfuente": "Registro de sanciones", "titulo": "Pequeña minería y áridos: multas pendientes de pago en cuatro regiones", "resumen": "Sanciones impagas en faenas de pequeña escala y áridos: Cantera Cerro Lo Águila (D-034-2023, 1,70 UTA), Áridos Vista Hermosa (D-045-2023, 5,10 UTA), Planta de Áridos San Pedro (D-036-2018, 520 UTA) y Canteras Lonco (D-048-2015, 488 UTA). Impacto desproporcionado de la cobranza sobre pequeños productores.", "url": "https://snifa.sma.gob.cl/RegistroPublico/Resultado/2026", "criticidad": "media", "organismo": "Superintendencia del Medio Ambiente", "region": "", "ref": "D-036-2018", "fechaFuente": "2026-09-22", "etiquetas": ["pequeña minería", "sanciones", "áridos"], "id": "76bf52cf675e", "dia": "2026-09-22"}, {"fuente": "PJUD", "subfuente": "1º T. Ambiental", "titulo": "Dos nuevas reclamaciones admitidas contra la prospección minera El Alto", "resumen": "El 1º Tribunal Ambiental acogió a trámite dos reclamaciones adicionales contra la aprobación del proyecto de prospección minera El Alto. Tercer proyecto de exploración judicializado en la macrozona norte en menos de un mes.", "url": "https://1ta.cl/se-acogen-a-tramite-dos-nuevas-reclamaciones-en-contra-de-aprobacion-de-proyecto-de-prospeccion-minera-el-alto/", "criticidad": "alta", "organismo": "Primer Tribunal Ambiental", "region": "Antofagasta", "ref": "", "fechaFuente": "2026-08-31", "etiquetas": ["judicialización", "sondajes", "permisología"], "id": "aec25d963599", "dia": "2026-09-22"}, {"fuente": "PJUD", "subfuente": "1º T. Ambiental", "titulo": "Rechazada la reclamación colla-diaguita por supuesta elusión del proyecto Kinross-La Coipa", "resumen": "El 1º Tribunal Ambiental rechazó la reclamación de una comunidad indígena colla-diaguita que alegaba elusión del SEIA en el proyecto Kinross-La Coipa. Fallo favorable al titular y precedente útil frente a acusaciones de fraccionamiento o elusión.", "url": "https://1ta.cl/reclamacion-de-comunidad-indigena-colla-diaguita-por-supuesta-elusion-de-proyecto-kinross-la-coipa-fue-rechazada/", "criticidad": "alta", "organismo": "Primer Tribunal Ambiental", "region": "Atacama", "ref": "", "fechaFuente": "2026-08-27", "etiquetas": ["judicialización", "elusión seia", "jurisprudencia"], "id": "6d8fb1a59e46", "dia": "2026-09-22"}, {"fuente": "PJUD", "subfuente": "1º T. Ambiental", "titulo": "Se ratifica la multa contra Codelco tras resolución sancionatoria de la SMA", "resumen": "El 1º Tribunal Ambiental confirmó la multa impuesta por la Superintendencia del Medio Ambiente a Codelco. Refuerza la línea jurisprudencial de deferencia del tribunal antofagastino hacia las sanciones de la SMA en la gran minería.", "url": "https://1ta.cl/se-ratifica-multa-contra-codelco-tras-resolucion-sancionatoria-de-la-superintendencia-del-medio-ambiente/", "criticidad": "alta", "organismo": "Primer Tribunal Ambiental", "region": "Antofagasta", "ref": "", "fechaFuente": "2026-08-25", "etiquetas": ["judicialización", "fiscalización", "codelco"], "id": "21d1edaf0101", "dia": "2026-09-22"}, {"fuente": "MENCION", "subfuente": "Portal Minero", "titulo": "Nueva plataforma integra la gestión de concesiones mineras de SERNAGEOMIN", "resumen": "SERNAGEOMIN lanzó una herramienta que consolida información técnica y administrativa de concesiones, consultable por titular, situación, ubicación y coordenadas. Relevante para el debate de patentes y amparo.", "url": "https://www.portalminero.com/nueva-plataforma-integra-la-gestion-de-concesiones-mineras-de-sernageomin", "criticidad": "alta", "organismo": "SERNAGEOMIN", "region": "", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["amparo minero", "permisología"], "tono": "positivo", "actores": ["Gobierno"], "id": "5bf02f60b918", "dia": "2026-09-22"}, {"fuente": "MENCION", "subfuente": "Diario Financiero", "titulo": "El nuevo timonel de la SMA busca reducir plazos a la mitad y centrarse en casos grandes", "resumen": "Emanuel Ibarra apunta a bajar de 22-24 a 12 meses la tramitación de programas de cumplimiento y sanciones. Impacta la certeza jurídica y la judicialización ambiental del sector.", "url": "https://www.df.cl/empresas/industria/nuevo-timonel-de-la-sma-busca-reducir-plazos-a-la-mitad-y-centrarse-en", "criticidad": "alta", "organismo": "Superintendencia del Medio Ambiente", "region": "", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["permisología", "fiscalización"], "tono": "positivo", "actores": ["Gobierno"], "id": "7df9e5b05027", "dia": "2026-09-22"}, {"fuente": "MENCION", "subfuente": "Diario Financiero", "titulo": "«El 2027 en la voz del mundo empresarial»: lo que esperan los gremios productivos", "resumen": "Tras un 2026 débil, los gremios productivos proyectan mayor dinamismo para 2027 pero condicionan el escenario. Pieza gremial donde SONAMI es un actor esperable de la muestra.", "url": "https://www.df.cl/economia-y-politica/2027-en-la-voz-del-mundo-empresarial-lo-que-esperan-de-la-economia-y-de-la", "criticidad": "alta", "organismo": "Diario Financiero", "region": "", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["reputación"], "tono": "neutro", "actores": [], "id": "a99b5a38300b", "dia": "2026-09-22"}, {"fuente": "MENCION", "subfuente": "Interferencia", "titulo": "«El millonario fracaso del coordinador económico de Kast en negocio minero»", "resumen": "Investigación sobre Jorge Quiroz, coordinador económico de Kast, y la minera Sierra Atacama, que acumuló $70.000 millones de deuda antes de ser vendida en 2024. Riesgo reputacional para el sector; sin mención a SONAMI.", "url": "https://interferencia.cl/articulos/el-millonario-fracaso-del-coordinador-economico-de-kast-en-negocio-minero-0", "criticidad": "alta", "organismo": "Interferencia", "region": "", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["reputación", "litio"], "tono": "negativo", "actores": ["Gobierno", "Empresas"], "id": "383159766d09", "dia": "2026-09-22"}, {"fuente": "MENCION", "subfuente": "Portal Minero", "titulo": "La reforma de redes eléctricas avanza hacia una propuesta regulatoria para 2027", "resumen": "El proceso participativo culmina en diciembre con una propuesta conceptual base del futuro proyecto de ley. Relevante para el suministro de la gran minería.", "url": "https://www.portalminero.com/reforma-de-redes-electricas-avanza-hacia-una-propuesta-regulatoria-para-2027", "criticidad": "media", "organismo": "Portal Minero", "region": "", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["energía"], "tono": "neutro", "actores": ["Gobierno"], "id": "0e80ea1fcabd", "dia": "2026-09-22"}, {"fuente": "MENCION", "subfuente": "Radio U. de Chile", "titulo": "Trama Bielorrusa: el exdiputado Gabriel Silber será formalizado por soborno y lavado", "resumen": "Silber enfrenta formalización por pagos de unos $95 millones vinculados a servicios legales a un consorcio minero en disputa con Codelco. Riesgo reputacional de borde para el sector.", "url": "https://radio.uchile.cl/2026/09/22/trama-bielorrusa-exdiputado-gabriel-silber-sera-formalizado-por-soborno-y-lavado-de-activos/", "criticidad": "media", "organismo": "Radio Universidad de Chile", "region": "", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["reputación"], "tono": "negativo", "actores": ["Codelco"], "id": "889f5527dee7", "dia": "2026-09-22"}, {"fuente": "MENCION", "subfuente": "La Tercera", "titulo": "Río atmosférico extremo: se esperan más de 200 mm en seis regiones", "resumen": "Río atmosférico categoría 4 con avisos de precipitación extrema en seis regiones del sur hasta el 24 de septiembre. Contexto operacional y de continuidad para faenas del centro-sur.", "url": "https://www.latercera.com/tendencias/noticia/se-esperan-mas-de-200-mm-las-regiones-afectadas-por-el-rio-atmosferico-extremo-que-llega-a-chile/", "criticidad": "media", "organismo": "La Tercera", "region": "", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["agua", "continuidad operacional"], "tono": "neutro", "actores": [], "id": "0ae53ce5a319", "dia": "2026-09-22"}, {"fuente": "SENAPRED", "subfuente": "Alertas vigentes", "titulo": "Alerta Amarilla por evento meteorológico en 4 comunas de Arica y Parinacota", "resumen": "Cuatro comunas bajo Alerta Amarilla por evento meteorológico vigente desde el 16-08-2026: Arica, Camarones, Putre y General Lagos. Es la única alerta amarilla vigente en el país; no hay ninguna alerta roja.", "url": "https://services3.arcgis.com/CNzkI2T3GmfwkaAR/arcgis/rest/services/METEOROLOGICAS_AMARILLA/FeatureServer/0/query?where=1%3D1&outFields=*&f=json&returnGeometry=false", "criticidad": "media", "organismo": "SENAPRED", "region": "Arica y Parinacota", "ref": "AMARILLA", "fechaFuente": "2026-08-16", "etiquetas": ["alertas", "agua"], "id": "8ec4e24c096d", "dia": "2026-09-22"}, {"fuente": "SENAPRED", "subfuente": "Alertas vigentes", "titulo": "Alerta Temprana Preventiva en 39 comunas de Valparaíso", "resumen": "Casi toda la región bajo Temprana Preventiva por evento meteorológico, incluidas Los Andes, San Felipe, Calle Larga y Rinconada, zona de faenas como Andina y El Soldado. El registro no consigna fecha de inicio.", "url": "https://services3.arcgis.com/CNzkI2T3GmfwkaAR/arcgis/rest/services/METEOROLOGICAS_VERDE/FeatureServer/0/query?where=1%3D1&outFields=*&f=json&returnGeometry=false", "criticidad": "info", "organismo": "SENAPRED", "region": "Valparaíso", "ref": "VERDE", "fechaFuente": "2026-09-22", "etiquetas": ["alertas", "agua"], "id": "35908194d145", "dia": "2026-09-22"}, {"fuente": "SENAPRED", "subfuente": "Sismología", "titulo": "Sismos menores junto a Escondida y Collahuasi; ninguno sobre M4,5", "resumen": "En las últimas 24 horas se registró un M2,8 a 15 km al NE de Mina La Escondida y dos eventos (M2,8 y M2,5) a 56 km al SO de Mina Collahuasi, todos profundos y sin impacto esperable. El mayor sismo del período fue M4,2 a 71 km al NE de Calama.", "url": "https://api.gael.cloud/general/public/sismos", "criticidad": "info", "organismo": "Centro Sismológico Nacional / GAEL", "region": "Antofagasta", "ref": "", "fechaFuente": "2026-09-22", "etiquetas": ["sismos", "seguridad"], "id": "a7d93777647a", "dia": "2026-09-22"}, {"fuente": "LEG", "subfuente": "Senado", "titulo": "Amparo minero: aprobado en general en el Senado; plazo de indicaciones vence el lunes 28-09", "resumen": "Boletín 18259-08 en segundo trámite, con urgencia suma. La Sala lo aprobó en general el 09-09 (29-4-1) y pasa a las comisiones de Minería y Energía y de Hacienda. Elimina la escala progresiva de patentes y fija 0,4 UTM/ha (0,1 UTM para productores que trabajan la concesión). SONAMI debe presentar sus indicaciones esta semana.", "url": "https://tramitacion.senado.cl/wspublico/tramitacion.php?boletin=18259", "criticidad": "critica", "organismo": "Senado — Comisión de Minería y Energía", "region": "", "ref": "Boletín 18259-08", "fechaFuente": "2026-09-09", "etiquetas": ["amparo minero", "patentes", "pequeña minería"], "id": "ccccaa3cca0a", "dia": "2026-09-22"}, {"fuente": "LEG", "subfuente": "Senado", "titulo": "La Sala del Senado ve hoy el proyecto sobre exportación de residuos peligrosos", "resumen": "El Boletín 15627-12 está en el Orden del Día de la sesión 59 (22-09) y modifica la ley de residuos en materia de exportación de residuos peligrosos. Puede afectar la gestión de residuos de faenas mineras.", "url": "https://www.senado.cl/actividad-legislativa/sala-de-sesiones/tabla-semanal", "criticidad": "media", "organismo": "Senado — Sala", "region": "", "ref": "Boletín 15627-12", "fechaFuente": "2026-09-22", "etiquetas": ["residuos", "medio ambiente"], "id": "27acd5d520a4", "dia": "2026-09-22"}, {"fuente": "REG", "subfuente": "Consulta ciudadana", "titulo": "Consulta pública para modificar los plazos de la Norma Lumínica; reunión informativa el 24-09", "resumen": "Consulta MMA N°233 sobre los plazos de cumplimiento del DS 1/2022, que regula la iluminación de faenas en el norte. Reunión por Zoom el 24-09 a las 10:30. El plazo de observaciones no fue legible en el portal: verificar.", "url": "https://mma.gob.cl/actividades/consulta-publica-modificacion-de-plazos-de-la-norma-luminica/", "criticidad": "alta", "organismo": "Ministerio del Medio Ambiente", "region": "", "ref": "Consulta MMA 233", "fechaFuente": "2026-09-24", "etiquetas": ["norma lumínica", "consulta", "reglamento"], "id": "221440be2239", "dia": "2026-09-22"}, {"fuente": "REG", "subfuente": "Contraloría", "titulo": "Reglamento de Seguridad Minera (de 55 a 13 permisos) pendiente de toma de razón", "resumen": "El Ejecutivo ingresó a Contraloría la modificación que adecúa el reglamento a la Ley 21.770: 13 permisos y 18 técnicas habilitantes alternativas vía declaración jurada. Clave para la permisología minera. Fuente secundaria (La Tercera), porque contraloria.cl no es legible automáticamente.", "url": "https://www.latercera.com/pulso/noticia/gobierno-ingresa-a-contraloria-modificacion-que-simplifica-55-permisos-mineros-en-13-tramites-para-empujar-la-inversion/", "criticidad": "media", "organismo": "Contraloría General de la República", "region": "", "ref": "Toma de razón", "fechaFuente": "2026-08-03", "etiquetas": ["permisología", "seguridad minera", "ley 21.770"], "id": "4956084a40cf", "dia": "2026-09-22"}, {"fuente": "LOBBY", "subfuente": "Subsecretaría de Minería", "titulo": "Jorge Riesco (SONAMI) se reúne con el subsecretario Álvaro González por los efectos de las lluvias en zonas mineras", "resumen": "Audiencia de Ley de Lobby sobre los daños de las lluvias en zonas mineras y medidas de apoyo. Gestión propia de SONAMI ante una autoridad clave. Registro vía el resumen mensual de REDIMIN.", "url": "https://www.redimin.cl/litio-y-grandes-proyectos-marcaron-las-32-reuniones-del-sector-minero-con-autoridades-en-agosto", "criticidad": "alta", "organismo": "Subsecretaría de Minería", "region": "", "ref": "Audiencia 31-08-2026", "fechaFuente": "2026-08-31", "etiquetas": ["lobby", "sonami", "emergencia climática"], "id": "c895a209b058", "dia": "2026-09-22"}, {"fuente": "LOBBY", "subfuente": "Subsecretaría de Minería", "titulo": "Llamara Group, con Laurence Golborne, presenta su proyecto de litio y el estado de su CEOL", "resumen": "Carlos Araya, Felipe Santa María, Rolando Donoso y Laurence Golborne se reunieron con el subsecretario Álvaro González por el Salar de Llamara y su solicitud de Contrato Especial de Operación de Litio.", "url": "https://www.redimin.cl/litio-y-grandes-proyectos-marcaron-las-32-reuniones-del-sector-minero-con-autoridades-en-agosto", "criticidad": "alta", "organismo": "Subsecretaría de Minería", "region": "Tarapacá", "ref": "Audiencia 24-08-2026", "fechaFuente": "2026-08-24", "etiquetas": ["lobby", "litio", "ceol"], "id": "b54c7a4c2a1a", "dia": "2026-09-22"}, {"fuente": "LOBBY", "subfuente": "Ministerio de Minería", "titulo": "Lithium Atacama, Salares de Chile y Quiborax consultan por sus proyectos de litio (Ascotán)", "resumen": "La jefa de la División de Estrategia y Políticas Públicas Mineras, María Baltra, recibió a Lithium Atacama SpA y a Salares de Chile / Quiborax por el proyecto Salar de Ascotán. Seguimiento de las CEOL de litio.", "url": "https://www.redimin.cl/litio-y-grandes-proyectos-marcaron-las-32-reuniones-del-sector-minero-con-autoridades-en-agosto", "criticidad": "media", "organismo": "Ministerio de Minería", "region": "Antofagasta", "ref": "Audiencias 28-08-2026", "fechaFuente": "2026-08-28", "etiquetas": ["lobby", "litio", "ceol"], "id": "b86103f82285", "dia": "2026-09-22"}, {"fuente": "LOBBY", "subfuente": "Seremi de Minería Biobío", "titulo": "Aclara Resources se reúne con el seremi de Minería del Biobío por su proyecto de tierras raras en Penco", "resumen": "Ejecutivos de Aclara sostuvieron audiencias el 5 y el 25 de agosto con el seremi Daniel Escobar por el proyecto de tierras raras de Penco, hoy impugnado.", "url": "https://www.redimin.cl/litio-y-grandes-proyectos-marcaron-las-32-reuniones-del-sector-minero-con-autoridades-en-agosto", "criticidad": "media", "organismo": "Seremi de Minería Biobío", "region": "Biobío", "ref": "Audiencia 25-08-2026", "fechaFuente": "2026-08-25", "etiquetas": ["lobby", "tierras raras"], "id": "b45390638192", "dia": "2026-09-22"}, {"fuente": "MENCION", "subfuente": "Encuestas", "titulo": "Criteria: 74% rechaza privatizar Codelco y 48% prefiere mantenerla 100% estatal", "resumen": "Encuesta online del 31-07-2026: 26% apoya privatizar, 31% prefiere un modelo mixto con control estatal y 5% una privatización mayoritaria. El rechazo se mantiene estable frente a mayo (72%).", "url": "https://www.t13.cl/noticia/politica/privatizar-codelco-mantenerla-estatal-criteria-revela-opinan-chilenos-futuro-minera-2-8-2026", "criticidad": "media", "organismo": "Criteria", "region": "", "ref": "Criteria 31-07-2026", "fechaFuente": "2026-08-02", "etiquetas": ["encuestas", "codelco", "opinión pública"], "tono": "neutro", "actores": ["Codelco"], "id": "a250f0e1c23a", "dia": "2026-09-22"}, {"fuente": "SEA", "subfuente": "Conflictos", "titulo": "Cobquecura: crece la oposición a 71 concesiones de tierras raras; marcha convocada para el 25-10", "resumen": "Grupos como «Cobquecura Sin Mineras» rechazan concesiones de Neore, Andes Mainstream, UKA Chile y Greenfield/Aclara y marcharán a la Delegación de Ñuble el 25-10-2026.", "url": "https://olca.cl/articulo/nota.php?id=111695", "criticidad": "media", "organismo": "OLCA", "region": "Ñuble", "ref": "OLCA 111695", "fechaFuente": "2026-08-28", "etiquetas": ["conflictos", "tierras raras", "movilización"], "id": "17e73797a1d9", "dia": "2026-09-22"}, {"fuente": "SEA", "subfuente": "Conflictos", "titulo": "ONGs convocan a marchar contra la «regresión socioambiental» y las declaraciones juradas", "resumen": "OLCA, FECH y MAT se movilizan contra la derogación de 43 decretos ambientales, el reemplazo de evaluación por declaraciones juradas y la «megarreforma». Campaña directa contra la agenda de permisos que SONAMI impulsa.", "url": "https://olca.cl/articulo/nota.php?id=111702", "criticidad": "alta", "organismo": "OLCA", "region": "", "ref": "OLCA 111702", "fechaFuente": "2026-08-31", "etiquetas": ["conflictos", "permisología", "campaña"], "id": "18869485130a", "dia": "2026-09-22"}, {"fuente": "REG", "subfuente": "Consejo de Ministros", "titulo": "Reglamento SEIA Fase 3 debe pasar por el Consejo de Ministros para la Sustentabilidad; última acta publicada es de febrero", "resumen": "El MMA publica las actas del Consejo de Ministros para la Sustentabilidad y el Cambio Climático con rezago: la última disponible es la sesión 2 del 13-02-2026 (norma primaria de CO y Pingüino de Humboldt). El pronunciamiento sobre el reglamento SEIA Fase 3 (umbral minero de 40.000 t/mes) será el próximo hito antes de Contraloría.", "url": "https://mma.gob.cl/consejo-de-ministros-para-la-sustentablidad/", "criticidad": "media", "organismo": "Consejo de Ministros para la Sustentabilidad y el Cambio Climático", "region": "", "ref": "Sesión 2/2026", "fechaFuente": "2026-02-13", "etiquetas": ["reglamento", "seia", "consejo de ministros"], "id": "592a9cc8df31", "dia": "2026-09-22"}, {"fuente": "SENAPRED", "subfuente": "Clima", "titulo": "Nevadas probables en la cordillera central el 23 y 24-09: El Teniente y Andina/Los Bronces", "resumen": "Pronóstico met.no: en El Teniente ~10,8 mm el 23-09 y 2,9 mm el 24-09 con temperaturas bajo 1 °C; en Andina/Los Bronces ~4,8 mm el 23-09 con mínimas de -4 °C. Coincide con el río atmosférico de esta semana. El norte (Calama, Escondida, Copiapó) sigue estable y sin precipitaciones.", "url": "https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=-34.08&lon=-70.35", "criticidad": "media", "organismo": "MET Norway (pronóstico)", "region": "O'Higgins", "ref": "Pronóstico 23-24/09", "fechaFuente": "2026-09-22", "etiquetas": ["clima", "nieve", "continuidad operacional"], "id": "5ade89e23597", "dia": "2026-09-22"}], "generado": "2026-09-22T16:30:00-03:00", "estadoFuentes": [{"fuente": "DO", "estado": "parcial", "detalle": "4 ediciones leídas; PDFs individuales bloqueados"}, {"fuente": "SEA", "estado": "parcial", "detalle": "PAC, reclamaciones, Comité de Ministros, conflictos"}, {"fuente": "REG", "estado": "parcial", "detalle": "Contraloría bloqueada: vía prensa; CMS y consultas MMA OK"}, {"fuente": "SMA", "estado": "parcial", "detalle": "Registro leído; sin fecha por fila"}, {"fuente": "PJUD", "estado": "parcial", "detalle": "1º y 3º TA OK; carátulas 2º TA ilegibles"}, {"fuente": "SEC", "estado": "ok", "detalle": "RSS leído (2 páginas)"}, {"fuente": "SENAPRED", "estado": "ok", "detalle": "Alertas, sismos y clima (met.no) leídos"}, {"fuente": "LEG", "estado": "parcial", "detalle": "Senado WS y tabla OK; Cámara vía opendata"}, {"fuente": "INST", "estado": "parcial", "detalle": "DGA y CMF OK; ENAMI/SERNAGEOMIN vía prensa"}, {"fuente": "LOBBY", "estado": "parcial", "detalle": "leylobby.gob.cl bloqueado; vía REDIMIN mensual"}, {"fuente": "MENCION", "estado": "parcial", "detalle": "Medios, gremios y encuestas; Bing parcial"}, {"fuente": "RRSS", "estado": "error", "detalle": "Pendiente: conectar Apify (X, LinkedIn, Meta)"}], "tipo": "piloto"}, {"fecha": "2026-09-21", "items": [{"fuente": "SEC", "subfuente": "SEC", "titulo": "La SEC formula cargos a Certpro y Underfire por fallas en la certificación de medidores", "resumen": "La SEC imputa cargos a dos organismos certificadores por no revisar completamente los circuitos de medición de medidores Nansen. Refuerza la exigencia sobre certificadores autorizados, régimen que también aplica a equipos e instalaciones eléctricas de faenas.", "url": "https://www.sec.cl/sec-formula-cargos-a-certpro-y-underfire-por-eventuales-incumplimientos-en-la-certificacion-de-medidores/", "criticidad": "media", "organismo": "Superintendencia de Electricidad y Combustibles", "region": "", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["energía", "certificación", "sanciones"], "id": "09ac80d031ab", "dia": "2026-09-21"}, {"fuente": "PJUD", "subfuente": "3º T. Ambiental", "titulo": "Audiencia 26-11-2026: Municipalidad de Concepción con SEA, rol R-49-2026", "resumen": "El 3º Tribunal Ambiental fijó para el 26-11-2026 la audiencia en «I. Municipalidad de Concepción con Servicio de Evaluación Ambiental» (R-49-2026). Interesa por la legitimación activa de municipios para impugnar calificaciones ambientales, tendencia extensible a proyectos mineros.", "url": "https://3ta.cl/audiencias/26-11-2026-fija-audiencia-en-caso-de-ilustre-municipalidad-de-concepcion-con-servicio-de-evaluacion-ambiental-rol-r-49-2026/", "criticidad": "media", "organismo": "Tercer Tribunal Ambiental", "region": "Biobío", "ref": "R-49-2026", "fechaFuente": "2026-09-21", "etiquetas": ["judicialización", "permisología", "municipios"], "id": "e4ca56065335", "dia": "2026-09-21"}, {"fuente": "PJUD", "subfuente": "3º T. Ambiental", "titulo": "Audiencia de la causa R-11-2026, Australis Mar S.A. con la SMA", "resumen": "El 3º Tribunal Ambiental transmitió la audiencia de la causa R-11-2026 «Australis Mar S.A. con Superintendencia del Medio Ambiente». No es minera, pero el criterio que fije sobre proporcionalidad de las sanciones de la SMA es extrapolable a titulares mineros.", "url": "https://3ta.cl/noticias/transmision-audiencia-causa-r-11-2026-australis-mar-s-a-con-superintendencia-del-medio-ambiente-ces-cordova-5/", "criticidad": "info", "organismo": "Tercer Tribunal Ambiental", "region": "Los Lagos", "ref": "R-11-2026", "fechaFuente": "2026-09-21", "etiquetas": ["judicialización", "fiscalización", "jurisprudencia"], "id": "3b304723d0fc", "dia": "2026-09-21"}, {"fuente": "MENCION", "subfuente": "La Tercera", "titulo": "Columna: «Patentes mineras: no come ni deja comer, pero paga»", "resumen": "Columna de opinión sobre el sistema de patentes mineras y el amparo, en pleno debate legislativo. Tema de agenda regulatoria directa para el gremio.", "url": "https://www.latercera.com/opinion/noticia/patentes-mineras-no-come-ni-deja-comer-pero-paga/", "criticidad": "alta", "organismo": "La Tercera", "region": "", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["amparo minero", "pequeña minería"], "tono": "neutro", "actores": [], "id": "44dd85798ab1", "dia": "2026-09-21"}, {"fuente": "MENCION", "subfuente": "Portal Innova", "titulo": "«Del amparo minero a la Ley Marco: la pequeña minería necesita algo más que una rebaja de patente»", "resumen": "Análisis que sostiene que la reforma al amparo minero es insuficiente sin una ley marco para la pequeña minería. Toca de lleno la agenda gremial de SONAMI.", "url": "https://portalinnova.cl/del-amparo-minero-a-la-ley-marco-la-pequena-mineria-necesita-algo-mas-que-una-rebaja-de-patente/", "criticidad": "alta", "organismo": "Portal Innova", "region": "", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["amparo minero", "pequeña minería"], "tono": "neutro", "actores": [], "id": "213f70ad1aad", "dia": "2026-09-21"}, {"fuente": "MENCION", "subfuente": "Diario Financiero", "titulo": "Editorial: «Alza frutícola versus recesión minera»", "resumen": "Editorial de DF que contrasta el dinamismo frutícola con el estancamiento de la minería. Ángulo crítico sobre el desempeño sectorial que el gremio viene advirtiendo.", "url": "https://www.df.cl/opinion/editorial/alza-fruticola-versus-recesion-minera", "criticidad": "alta", "organismo": "Diario Financiero", "region": "", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["reputación", "permisología"], "tono": "negativo", "actores": [], "id": "58357a87c357", "dia": "2026-09-21"}, {"fuente": "MENCION", "subfuente": "Diario Financiero", "titulo": "Pucobre reporta accidente en planta con pérdidas sobre US$10 millones", "resumen": "Colapso parcial de un domo en la planta San José durante Fiestas Patrias, sin lesionados pero con daños sobre US$10 millones. Afecta a una mediana minera del universo SONAMI.", "url": "https://www.df.cl/empresas/mineria/pucobre-reporta-accidente-en-planta-que-implicara-perdidas-por-mas-de-us", "criticidad": "critica", "organismo": "Pucobre", "region": "Atacama", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["seguridad", "mediana minería"], "tono": "negativo", "actores": ["Empresas"], "id": "784fee0e0c42", "dia": "2026-09-21"}, {"fuente": "MENCION", "subfuente": "Portal Minero", "titulo": "El mercado del litio corrige sus precios tras moderarse el riesgo de oferta", "resumen": "Cochilco reportó el carbonato de litio spot en US$19.525 por tonelada, con perspectivas de superávit para 2027-2028 que limitan alzas sostenidas.", "url": "https://www.portalminero.com/mercado-del-litio-corrige-sus-precios-tras-moderarse-el-riesgo-de-oferta", "criticidad": "media", "organismo": "Cochilco", "region": "", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["litio"], "tono": "neutro", "actores": ["Gobierno"], "id": "6f279baf0f02", "dia": "2026-09-21"}, {"fuente": "MENCION", "subfuente": "Diario Financiero", "titulo": "Capstone Copper vende una mina en México por US$385 millones para centrarse en Chile", "resumen": "La canadiense racionaliza su portafolio para concentrar el crecimiento de cobre en Chile y EE.UU. Señal de reasignación de capital hacia el país.", "url": "https://www.df.cl/empresas/mineria/canadiense-capstone-copper-vende-mina-en-mexico-por-us-385-millones-para", "criticidad": "media", "organismo": "Capstone Copper", "region": "", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["reputación", "inversión"], "tono": "positivo", "actores": ["Empresas"], "id": "5b496d760fdc", "dia": "2026-09-21"}, {"fuente": "MENCION", "subfuente": "REDIMIN", "titulo": "Chile eleva su cartera hídrica a US$23.913 millones y la minería concentra US$7.534 millones", "resumen": "La cartera de proyectos hídricos crece y la minería concentra cerca de un tercio. Tema de agua y habilitación de inversión sectorial.", "url": "https://www.redimin.cl/chile-eleva-cartera-hidrica-a-us-23-913-millones-y-mineria-concentra-us-7-534-millones", "criticidad": "media", "organismo": "REDIMIN", "region": "", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["agua", "inversión"], "tono": "positivo", "actores": [], "id": "bb2001710446", "dia": "2026-09-21"}, {"fuente": "MENCION", "subfuente": "Portal Minero", "titulo": "Perú: los proyectos mineros en cartera acumulan retrasos promedio de 15 años", "resumen": "El Instituto Peruano de Economía alerta que la demora en desarrollar proyectos limita el aprovechamiento del ciclo de precios. Referencia comparada útil en el debate de permisología.", "url": "https://www.portalminero.com/peru-ipe-advierte-que-proyectos-mineros-en-cartera-acumulan-retrasos-promedio-de-15-anos", "criticidad": "info", "organismo": "Portal Minero", "region": "", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["permisología"], "tono": "neutro", "actores": [], "id": "48036acfcf27", "dia": "2026-09-21"}, {"fuente": "MENCION", "subfuente": "Portal Minero", "titulo": "Fundación Collahuasi ejecuta obras de recuperación en el CIAS tras las lluvias en Tarapacá", "resumen": "Reparación del Centro Integral Ariel Standen dañado por la contingencia climática de agosto en Tarapacá. Contexto de relación comunitaria en región minera.", "url": "https://www.portalminero.com/fundacion-collahuasi-ejecuta-obras-de-recuperacion-en-cias-tras-fuertes-lluvias-que-afectaron-a-tarapaca", "criticidad": "info", "organismo": "Fundación Collahuasi", "region": "Tarapacá", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["agua", "reputación"], "tono": "positivo", "actores": ["Empresas"], "id": "db2c6dc1ef27", "dia": "2026-09-21"}, {"fuente": "MENCION", "subfuente": "Consejo Minero", "titulo": "Joaquín Villarino (Consejo Minero): «El futuro minero se invierte hoy»", "resumen": "Columna del presidente ejecutivo del Consejo Minero que pide acelerar permisos y certeza jurídica para concretar la cartera de inversión. Postura alineada con SONAMI.", "url": "https://consejominero.cl/opinion/joaquin-villarino-el-futuro-minero-se-invierte-hoy/", "criticidad": "media", "organismo": "Consejo Minero", "region": "", "ref": "", "fechaFuente": "2026-09-21", "etiquetas": ["permisología", "inversión", "gremios"], "tono": "positivo", "actores": ["Consejo Minero"], "id": "cf7e59720a2d", "dia": "2026-09-21"}, {"fuente": "SEA", "subfuente": "Comisión de Evaluación", "titulo": "Se suspende la sesión de la Comisión de Atacama que revisaría las impugnaciones a Prospección Minera El Alto", "resumen": "La sesión extraordinaria 16/2026 del 21-09 en Copiapó debía resolver el silencio administrativo pedido por la Comunidad Diaguita Los Huasco Altinos y recursos de invalidación contra la RCA de Compañía Minera Nevada. Quedó suspendida sin nueva fecha; el proyecto también está reclamado en el 1º Tribunal Ambiental.", "url": "https://www.redimin.cl/sea-marca-como-suspendida-sesion-que-debia-revisar-recursos-contra-prospeccion-minera-el-alto", "criticidad": "alta", "organismo": "Comisión de Evaluación Ambiental de Atacama", "region": "Atacama", "ref": "Sesión extraordinaria 16/2026", "fechaFuente": "2026-09-21", "etiquetas": ["sondajes", "invalidación", "permisología"], "id": "4e88cef7186e", "dia": "2026-09-21"}]}, {"fecha": "2026-09-19", "items": [{"fuente": "SEA", "subfuente": "Conflictos", "titulo": "Terram: 34 decretos ambientales retirados siguen sin tramitar, seis de protección de salares en Atacama", "resumen": "Replica a El Desconcierto: los proyectos de litio avanzan mientras siguen detenidas protecciones de salares como Pedernales y Laguna Escondida. Frente de presión ambiental sobre el litio.", "url": "https://www.terram.cl/el-desconcierto-salares-juan-fernandez-y-pinguino-de-humboldt-la-naturaleza-en-espera-por-retiro-de-decretos-ambientales/", "criticidad": "media", "organismo": "Fundación Terram", "region": "Atacama", "ref": "", "fechaFuente": "2026-09-19", "etiquetas": ["conflictos", "salares", "litio"], "id": "c534e2bf76ca", "dia": "2026-09-19"}]}, {"fecha": "2026-09-17", "items": [{"fuente": "MENCION", "subfuente": "Diario La Región", "titulo": "Royalty minero: las comunas de Coquimbo recibieron más de $18.452 millones durante 2026", "resumen": "Bajada regional de la distribución del royalty en Coquimbo. Temática sectorial sin mención al gremio.", "url": "https://www.diariolaregion.cl/royalty-minero-comunas-de-la-region-de-coquimbo-recibieron-mas-de-18-452-millones-durante-2026/", "criticidad": "media", "organismo": "Diario La Región", "region": "Coquimbo", "ref": "", "fechaFuente": "2026-09-17", "etiquetas": ["royalty"], "tono": "positivo", "actores": ["Gobierno"], "id": "288c5234a884", "dia": "2026-09-17"}, {"fuente": "MENCION", "subfuente": "Portal Minero", "titulo": "La minería concentra el 62,6% de las exportaciones chilenas en los primeros ocho meses", "resumen": "La minería aportó US$52.130 millones de los US$83.252 millones exportados entre enero y agosto de 2026. Dato de peso sectorial utilizable como argumento gremial.", "url": "https://www.portalminero.com/sector-minero-concentra-el-626-de-las-exportaciones-chilenas-en-los-primeros-ocho-meses", "criticidad": "media", "organismo": "Portal Minero", "region": "", "ref": "", "fechaFuente": "2026-09-17", "etiquetas": ["reputación"], "tono": "positivo", "actores": [], "id": "035e1401c602", "dia": "2026-09-17"}, {"fuente": "SENAPRED", "subfuente": "Alertas vigentes", "titulo": "Alerta Temprana Preventiva en 32 comunas de O'Higgins", "resumen": "Vigente desde el 17-09-2026 en 32 comunas de la región, zona de influencia de El Teniente. Coincide con el río atmosférico anunciado para esta semana.", "url": "https://services3.arcgis.com/CNzkI2T3GmfwkaAR/arcgis/rest/services/METEOROLOGICAS_VERDE/FeatureServer/0/query?where=1%3D1&outFields=*&f=json&returnGeometry=false", "criticidad": "info", "organismo": "SENAPRED", "region": "O'Higgins", "ref": "VERDE", "fechaFuente": "2026-09-17", "etiquetas": ["alertas", "agua"], "id": "b6d734bcdd28", "dia": "2026-09-17"}, {"fuente": "INST", "subfuente": "CMF · Pucobre", "titulo": "Hecho esencial de Pucobre: falla del domo en Planta San José reduce la molienda por ~3 semanas (US$12 millones)", "resumen": "El 16-09 se desprendió parte de la cubierta del domo de acopio, sin lesionados. La producción de concentrado baja por unas tres semanas y el efecto en resultados 2026 se estima en US$12 millones.", "url": "https://www.cmfchile.cl/institucional/hechos/hechos_portada.php", "criticidad": "critica", "organismo": "Sociedad Punta del Cobre S.A.", "region": "Atacama", "ref": "Doc. 2026090607189", "fechaFuente": "2026-09-17", "etiquetas": ["hecho esencial", "mediana minería", "seguridad"], "id": "ad67be2ea097", "dia": "2026-09-17"}]}, {"fecha": "2026-09-16", "items": [{"fuente": "DO", "subfuente": "Normas Generales", "titulo": "Componente variable del impuesto específico a los combustibles (Decreto exento 266/2026)", "resumen": "Hacienda fija el componente variable del impuesto específico a los combustibles. Incide directamente en el costo del diésel de faenas y transporte minero, ítem sensible del costo operacional de la pequeña y mediana minería.", "url": "https://www.diariooficial.interior.gob.cl/edicionelectronica/index.php?date=16-09-2026&edition=44552", "criticidad": "media", "organismo": "Ministerio de Hacienda", "region": "", "ref": "CVE-2873683 / Decreto exento 266/2026", "fechaFuente": "2026-09-16", "etiquetas": ["tributario", "combustibles", "costos"], "id": "b36b5709c185", "dia": "2026-09-16"}, {"fuente": "DO", "subfuente": "Normas Generales", "titulo": "Energía fija precios de referencia y paridad de combustibles derivados del petróleo", "resumen": "Decretos exentos 227, 228 y 229 de 2026 fijan precios de referencia y de paridad bajo el MEPCO. Referencia semanal para el costo de diésel en faenas y transporte minero.", "url": "https://www.diariooficial.interior.gob.cl/edicionelectronica/index.php?date=16-09-2026&edition=44552", "criticidad": "info", "organismo": "Ministerio de Energía", "region": "", "ref": "CVE-2873680 / Decretos exentos 227, 228 y 229", "fechaFuente": "2026-09-16", "etiquetas": ["energía", "combustibles", "costos"], "id": "a685672f25a6", "dia": "2026-09-16"}, {"fuente": "SEC", "subfuente": "SEC", "titulo": "La SEC fiscaliza instalaciones de fondas y ramadas al inicio de Fiestas Patrias", "resumen": "Operativo de inspección de seguridad eléctrica y de combustibles en instalaciones temporales del Parque O'Higgins. Contexto del despliegue fiscalizador de la SEC; sin impacto directo en faenas mineras.", "url": "https://www.sec.cl/sec-fiscaliza-instalaciones-de-fondas-y-ramadas-a-horas-del-inicio-de-fiestas-patrias/", "criticidad": "info", "organismo": "Superintendencia de Electricidad y Combustibles", "region": "Metropolitana", "ref": "", "fechaFuente": "2026-09-16", "etiquetas": ["energía", "fiscalización"], "id": "cd1ee63c1905", "dia": "2026-09-16"}, {"fuente": "PJUD", "subfuente": "2º T. Ambiental", "titulo": "El 2º T. Ambiental publica 14 causas el 16-09; las carátulas no son legibles", "resumen": "El 2º Tribunal Ambiental publicó el 16-09-2026 los roles R-667, R-666, R-665, R-663, R-619, R-605, R-601, R-596, R-593, R-592 y R-584 de 2026, más R-572, R-547 y R-534 de 2025. La ficha no expone las partes, por lo que no se pudo determinar si hay causas mineras: requiere revisión manual.", "url": "https://tribunalambiental.cl/r-667-2026/", "criticidad": "media", "organismo": "Segundo Tribunal Ambiental", "region": "", "ref": "R-667-2026", "fechaFuente": "2026-09-16", "etiquetas": ["judicialización", "seguimiento"], "id": "2ac635b41146", "dia": "2026-09-16"}, {"fuente": "MENCION", "subfuente": "SONAMI", "titulo": "SONAMI participa en el 5º Congreso de Minería de Atacama", "resumen": "La directiva de SONAMI asistió al congreso regional y abordó los desafíos de la pequeña minería, la integración de infraestructura y el desarrollo regional. Replicado también por Diario Chañarcillo.", "url": "https://www.sonami.cl/v2/noticias/sonami-participa-en-el-5congreso-de-mineria-de-atacama/", "criticidad": "alta", "organismo": "SONAMI", "region": "Atacama", "ref": "", "fechaFuente": "2026-09-16", "etiquetas": ["pequeña minería", "reputación"], "tono": "positivo", "actores": ["SONAMI"], "id": "3186db2972cb", "dia": "2026-09-16"}, {"fuente": "MENCION", "subfuente": "Nueva Minería y Energía", "titulo": "El ministro Mas presenta en Londres la hoja de ruta para superar los 6 millones de toneladas", "resumen": "El biministro Daniel Mas expuso ante inversionistas en Londres la hoja de ruta para revertir el estancamiento productivo del cobre. Contraparte directa del gremio.", "url": "https://www.nuevamineria.com/revista/ministro-mas-presenta-en-londres-hoja-de-ruta-minera-de-chile-para-superar-los-seis-millones-de-toneladas-de-cobre/", "criticidad": "alta", "organismo": "Ministerio de Minería", "region": "", "ref": "", "fechaFuente": "2026-09-16", "etiquetas": ["permisología", "reputación"], "tono": "positivo", "actores": ["Gobierno"], "id": "7f6bca5396fd", "dia": "2026-09-16"}, {"fuente": "INST", "subfuente": "DGA", "titulo": "La DGA suma nuevas estaciones de monitoreo hídrico en la Región de Antofagasta", "resumen": "Nuevas estaciones de monitoreo en la principal región minera. Contexto para la gestión hídrica y los permisos de agua.", "url": "https://dga.mop.gob.cl/dga-del-mop-fortalece-red-de-monitoreo-hidrico-con-nuevas-estaciones-en-la-region-de-antofagasta/", "criticidad": "info", "organismo": "DGA", "region": "Antofagasta", "ref": "", "fechaFuente": "2026-09-16", "etiquetas": ["agua", "monitoreo"], "id": "256bf2dbc09c", "dia": "2026-09-16"}, {"fuente": "SEA", "subfuente": "Conflictos", "titulo": "Comunidad indígena de Lay Lay reclama contra la RCA de Desarrollo Futuro DMH de Codelco", "resumen": "Alegan vicios del Comité de Ministros (incluida la imparcialidad del biministro), saturación de MP10 en Calama, riesgo al acuífero y falta de consulta indígena. El 1º Tribunal Ambiental admitió la reclamación pero rechazó suspender la RCA.", "url": "https://www.reporteminero.cl/noticia/noticias/2026/09/asociacion-indigena-reclamacion-judicial-proyecto-desarrollo-futuro-dmh-codelco-calama", "criticidad": "alta", "organismo": "Primer Tribunal Ambiental", "region": "Antofagasta", "ref": "RCA Desarrollo Futuro DMH", "fechaFuente": "2026-09-16", "etiquetas": ["conflictos", "codelco", "judicialización"], "id": "5b9c6f0d277e", "dia": "2026-09-16"}]}, {"fecha": "2026-09-15", "items": [{"fuente": "MENCION", "subfuente": "Portal Minero", "titulo": "Los municipios reciben la cuarta transferencia del royalty minero: más de $56 mil millones", "resumen": "Cuarta transferencia del royalty minero a 309 municipios por $56.633 millones. Tema de agenda tributaria directa del gremio.", "url": "https://www.portalminero.com/municipios-reciben-cuarta-transferencia-del-royalty-minero-por-mas-de-56-mil-millones", "criticidad": "alta", "organismo": "Portal Minero", "region": "", "ref": "", "fechaFuente": "2026-09-15", "etiquetas": ["royalty"], "tono": "positivo", "actores": ["Gobierno"], "id": "36e938502cb8", "dia": "2026-09-15"}, {"fuente": "INST", "subfuente": "SERNAGEOMIN", "titulo": "Accidente fatal en mina Zulema, al sur de Taltal: trabajador de 56 años muere por caída de roca", "resumen": "Ocurrió el 15-09 en una faena de pequeña minería durante la acuñadura de avance. SERNAGEOMIN inspeccionó y derivó el caso al Ministerio Público. Relevante para la agenda de seguridad en pequeña minería.", "url": "https://www.reporteminero.cl/noticia/noticias/2026/09/accidente-fatal-mina-zulema-taltal-sernageomin-investigacion", "criticidad": "alta", "organismo": "SERNAGEOMIN", "region": "Antofagasta", "ref": "Zulema I 1 al 5", "fechaFuente": "2026-09-15", "etiquetas": ["accidente fatal", "pequeña minería", "seguridad"], "id": "e78f4fc952fb", "dia": "2026-09-15"}, {"fuente": "MENCION", "subfuente": "Consejo Minero", "titulo": "El Consejo Minero revisa con el subsecretario cinco temas regulatorios, entre ellos relaves y protección minera", "resumen": "Revisaron el Reglamento de Seguridad Minera adecuado a la LMAS, la reforma al reglamento de relaves, restricciones de Contraloría a aportes municipales, normas de aire en campamentos y el proyecto de protección minera. Agenda que SONAMI comparte.", "url": "https://consejominero.cl/actividades/consejo-minero-se-reune-con-subsecretario-de-mineria-para-revisar-temas-regulatorios-de-la-industria/", "criticidad": "alta", "organismo": "Consejo Minero", "region": "", "ref": "", "fechaFuente": "2026-09-15", "etiquetas": ["regulación", "relaves", "gremios"], "tono": "positivo", "actores": ["Consejo Minero", "Gobierno"], "id": "70bee88c5195", "dia": "2026-09-15"}]}, {"fecha": "2026-09-14", "items": [{"fuente": "SEC", "subfuente": "SEC", "titulo": "La SEC formula cargos a Enel por medición irregular que afectaría a más de 56 mil clientes", "resumen": "La SEC imputa cargos a Enel por medidores defectuosos en Pudahuel que generaron cobros excesivos, ordenando suspender la facturación y reemplazar los equipos. Involucra a una distribuidora que abastece al sector industrial y fija criterio fiscalizador sobre medición y facturación.", "url": "https://www.sec.cl/sec-formula-cargos-a-enel-por-medicion-irregular-que-podria-afectar-a-mas-de-56-mil-clientes/", "criticidad": "alta", "organismo": "Superintendencia de Electricidad y Combustibles", "region": "Metropolitana", "ref": "", "fechaFuente": "2026-09-14", "etiquetas": ["energía", "sanciones", "suministro"], "id": "e25f8785ede0", "dia": "2026-09-14"}, {"fuente": "MENCION", "subfuente": "Portal Innova", "titulo": "«Un Estado facilitador en minería necesita instituciones más fuertes»", "resumen": "Columna sobre permisología y capacidad institucional (SEA, SERNAGEOMIN) como cuello de botella de la inversión minera. Agenda regulatoria directa.", "url": "https://portalinnova.cl/un-estado-facilitador-en-mineria-necesita-instituciones-mas-fuertes/", "criticidad": "alta", "organismo": "Portal Innova", "region": "", "ref": "", "fechaFuente": "2026-09-14", "etiquetas": ["permisología"], "tono": "neutro", "actores": ["Gobierno"], "id": "b7cedd5431f8", "dia": "2026-09-14"}, {"fuente": "SENAPRED", "subfuente": "Alertas vigentes", "titulo": "Alerta Temprana Preventiva en 7 comunas de Tarapacá", "resumen": "Vigente desde el 14-09-2026 en Iquique, Alto Hospicio, Pozo Almonte, Pica, Huara, Camiña y Colchane. Cubre el entorno de operaciones como Collahuasi y Cerro Colorado.", "url": "https://services3.arcgis.com/CNzkI2T3GmfwkaAR/arcgis/rest/services/METEOROLOGICAS_VERDE/FeatureServer/0/query?where=1%3D1&outFields=*&f=json&returnGeometry=false", "criticidad": "info", "organismo": "SENAPRED", "region": "Tarapacá", "ref": "VERDE", "fechaFuente": "2026-09-14", "etiquetas": ["alertas", "agua"], "id": "8fd0f2a90c5a", "dia": "2026-09-14"}, {"fuente": "MENCION", "subfuente": "Consejo Minero", "titulo": "Consejo Minero: expertos analizan cómo la tecnología y los datos transforman las operaciones", "resumen": "Actividad sobre automatización, IA y analítica en la productividad minera. Contexto sectorial.", "url": "https://consejominero.cl/prensa/expertos-analizaron-como-la-tecnologia-y-los-datos-estan-transformando-las-operaciones-mineras/", "criticidad": "info", "organismo": "Consejo Minero", "region": "", "ref": "", "fechaFuente": "2026-09-14", "etiquetas": ["innovación", "gremios"], "tono": "positivo", "actores": ["Consejo Minero"], "id": "a2f807d99b14", "dia": "2026-09-14"}, {"fuente": "SEA", "subfuente": "Conflictos", "titulo": "OLCA cuestiona a Aclara por la planta piloto que habría anunciado en Santiago", "resumen": "OLCA pone en duda la información pública de Aclara y el 17-09 publicó que la Seremi de Salud no tiene antecedentes de una planta piloto de NeoRe en el Biobío.", "url": "https://olca.cl/articulo/nota.php?id=111713", "criticidad": "media", "organismo": "OLCA", "region": "Biobío", "ref": "OLCA 111713", "fechaFuente": "2026-09-14", "etiquetas": ["conflictos", "tierras raras"], "id": "ff3c4955c427", "dia": "2026-09-14"}]}, {"fecha": "2026-09-13", "items": [{"fuente": "SEA", "subfuente": "Conflictos", "titulo": "OLCA investiga 210 solicitudes de concesión de tierras raras (59.300 ha) en el centro-sur", "resumen": "OLCA vincula a solicitantes en Maule, Ñuble y Biobío con Minería Activa, Aclara, Neore y otras firmas, y exige transparencia. Campaña en marcha contra la minería de tierras raras que toca el régimen de concesiones.", "url": "https://olca.cl/articulo/nota.php?id=111711", "criticidad": "alta", "organismo": "OLCA", "region": "Biobío", "ref": "OLCA 111711", "fechaFuente": "2026-09-13", "etiquetas": ["conflictos", "tierras raras", "concesiones"], "id": "95ebae7ac6e0", "dia": "2026-09-13"}]}, {"fecha": "2026-09-11", "items": [{"fuente": "REG", "subfuente": "Consulta ciudadana", "titulo": "Reglamento SEIA Fase 3 (umbral minero de 40.000 t/mes): consulta cerrada el 11-09, falta el paso siguiente", "resumen": "Consulta MMA N°231. Sube el umbral de ingreso de la minería al SEIA de 5.000 a 40.000 t/mes y amplía los umbrales de prospección. SONAMI lo valoró el 10-08; ONGs estiman 26 proyectos mineros exentos. Seguir su paso al Consejo de Ministros y a Contraloría.", "url": "https://mma.gob.cl/actividades/consulta-publica-reglamento-sistema-de-evaluacion-de-impacto-ambiental-fase-3/", "criticidad": "alta", "organismo": "Ministerio del Medio Ambiente", "region": "", "ref": "Consulta MMA 231", "fechaFuente": "2026-09-11", "etiquetas": ["seia", "reglamento", "pequeña minería"], "id": "9989680b2c85", "dia": "2026-09-11"}, {"fuente": "INST", "subfuente": "SERNAGEOMIN", "titulo": "SERNAGEOMIN desvincula a su subdirector de Minería y ordena sumario tras filtración de chats", "resumen": "Salen Andrés León (subdirector de Minería) y Salustio Montalva (jefe jurídico) por chats sobre estrategias para destrabar proyectos. El caso fue enviado a Contraloría y puede afectar la tramitación de permisos.", "url": "https://www.reporteminero.cl/noticia/noticias/2026/09/sernageomin-desvincula-subdirector-mineria-sumario-interno-2026", "criticidad": "media", "organismo": "SERNAGEOMIN", "region": "", "ref": "", "fechaFuente": "2026-09-11", "etiquetas": ["institucional", "permisología", "probidad"], "id": "4d03271ef946", "dia": "2026-09-11"}, {"fuente": "MENCION", "subfuente": "Cochilco", "titulo": "Cochilco renueva su Anuario de Estadísticas del Cobre y Otros Minerales", "resumen": "Nueva edición del anuario con gráficos y comparaciones. Fuente de datos para argumentos gremiales.", "url": "https://www.cochilco.cl/web/cochilco-publica-una-version-renovada-de-su-anuario-de-estadisticas-del-cobre-y-otros-minerales/", "criticidad": "info", "organismo": "Cochilco", "region": "", "ref": "", "fechaFuente": "2026-09-11", "etiquetas": ["estadísticas", "cobre"], "tono": "neutro", "actores": ["Gobierno"], "id": "92fc995ece5d", "dia": "2026-09-11"}, {"fuente": "SEA", "subfuente": "Conflictos", "titulo": "La Municipalidad de Concepción impugna la RCA del proyecto de tierras raras de Aclara en Penco", "resumen": "Impugnación ante el Comité de Ministros por impactos en el río Andalién y el aire. BioBioChile informó el 16-09 que el recurso fue declarado inadmisible.", "url": "https://www.reporteminero.cl/noticia/noticias/2026/09/municipio-concepcion-impugna-aprobacion-proyecto-tierras-raras-aclara-penco", "criticidad": "media", "organismo": "SEA / Comité de Ministros", "region": "Biobío", "ref": "Proyecto Aclara Penco", "fechaFuente": "2026-09-11", "etiquetas": ["conflictos", "tierras raras"], "id": "cd16d282911b", "dia": "2026-09-11"}, {"fuente": "SEA", "subfuente": "Conflictos", "titulo": "OLCA: concesiones de tierras raras cercan más de 6.000 hectáreas en Quillón", "resumen": "Denuncia del avance de concesiones mineras de tierras raras en Quillón, parte de la misma campaña regional.", "url": "https://olca.cl/articulo/nota.php?id=111708", "criticidad": "media", "organismo": "OLCA", "region": "Ñuble", "ref": "OLCA 111708", "fechaFuente": "2026-09-11", "etiquetas": ["conflictos", "tierras raras"], "id": "66b296851d20", "dia": "2026-09-11"}]}, {"fecha": "2026-09-10", "items": [{"fuente": "MENCION", "subfuente": "SONAMI", "titulo": "SONAMI participa en seminario sobre liderazgo femenino en la minería", "resumen": "Quinto Seminario Minero del Maule centrado en liderazgo femenino, con profesionales, académicos y estudiantes. SONAMI aparece como participante institucional.", "url": "https://www.sonami.cl/v2/noticias/sonami-participa-en-seminario-que-visibiliza-el-de-liderazgo-femenino-en-la-mineria/", "criticidad": "alta", "organismo": "SONAMI", "region": "Maule", "ref": "", "fechaFuente": "2026-09-10", "etiquetas": ["laboral", "reputación"], "tono": "positivo", "actores": ["SONAMI"], "id": "de3a6849b914", "dia": "2026-09-10"}]}, {"fecha": "2026-09-09", "items": [{"fuente": "LEG", "subfuente": "Senado", "titulo": "Evaluación Ambiental 2.0: sigue en la Comisión de Medio Ambiente de la Cámara y el Ejecutivo retira la urgencia", "resumen": "Boletín 16552-12 (reforma al SEIA) en segundo trámite, con el primer informe de comisión pendiente. El Ejecutivo retiró la urgencia simple el 09-09 tras reformular indicaciones en julio y agosto. Clave para plazos e institucionalidad de la evaluación ambiental.", "url": "https://tramitacion.senado.cl/wspublico/tramitacion.php?boletin=16552", "criticidad": "media", "organismo": "Cámara de Diputados — Comisión de Medio Ambiente", "region": "", "ref": "Boletín 16552-12", "fechaFuente": "2026-09-09", "etiquetas": ["seia", "permisología", "medio ambiente"], "id": "817b32780201", "dia": "2026-09-09"}, {"fuente": "INST", "subfuente": "SERNAGEOMIN", "titulo": "SERNAGEOMIN y Banco Mundial avanzan en una agenda de minerales críticos e información geológica", "resumen": "Cooperación técnica para información geológica y minerales críticos. Contexto para exploración y fomento.", "url": "https://www.reporteminero.cl/noticia/noticias/2026/09/sernageomin-banco-mundial-minerales-criticos-informacion-geologica", "criticidad": "info", "organismo": "SERNAGEOMIN", "region": "", "ref": "", "fechaFuente": "2026-09-09", "etiquetas": ["minerales críticos", "geología"], "id": "b055749d7beb", "dia": "2026-09-09"}, {"fuente": "INST", "subfuente": "DGA", "titulo": "Se extienden por un año los decretos de escasez hídrica en Elqui, Limarí y Choapa", "resumen": "El MOP prorrogó las zonas de escasez en las tres provincias de Coquimbo, región con alta presencia de pequeña y mediana minería. Decretos MOP 177, 179 y 185, vigentes hasta julio de 2027.", "url": "https://regiondecoquimbo.cl/2026/09/09/gobierno-extiende-por-un-ano-decretos-de-escasez-hidrica-para-las-tres-provincias-de-la-region-de-coquimbo/", "criticidad": "alta", "organismo": "MOP / DGA", "region": "Coquimbo", "ref": "Dec. MOP 177, 179 y 185", "fechaFuente": "2026-09-09", "etiquetas": ["agua", "escasez hídrica", "decreto"], "id": "0166fa7bd34a", "dia": "2026-09-09"}]}, {"fecha": "2026-09-08", "items": [{"fuente": "PJUD", "subfuente": "2º T. Ambiental", "titulo": "Acumulación de las causas R-659, R-660 y R-661-2026 en el 2º T. Ambiental", "resumen": "El 08-09-2026 el 2º Tribunal Ambiental acumuló las causas R-660-2026 y R-661-2026 a la R-659-2026, junto con el ingreso de R-595-2026. Las carátulas no son legibles desde el sitio; no se pudo confirmar si involucran titulares mineros.", "url": "https://tribunalambiental.cl/r-659-2026-2/", "criticidad": "media", "organismo": "Segundo Tribunal Ambiental", "region": "", "ref": "R-659-2026", "fechaFuente": "2026-09-08", "etiquetas": ["judicialización", "seguimiento"], "id": "0f153ac147d3", "dia": "2026-09-08"}, {"fuente": "MENCION", "subfuente": "APRIMIN", "titulo": "APRIMIN realiza un Desayuno de Proyectos junto a Anglo American", "resumen": "Actividad con proveedores para conocer la cartera de proyectos de Anglo American. Contexto de la cadena de proveedores.", "url": "https://aprimin.cl/site/corporativas/aprimin-realiza-desayuno-de-proyectos-junto-a-anglo-american/", "criticidad": "info", "organismo": "APRIMIN", "region": "", "ref": "", "fechaFuente": "2026-09-08", "etiquetas": ["proveedores", "gremios"], "tono": "positivo", "actores": ["APRIMIN", "Empresas"], "id": "e66e303c2353", "dia": "2026-09-08"}]}, {"fecha": "2026-09-07", "items": [{"fuente": "MENCION", "subfuente": "Cochilco", "titulo": "Cochilco publica un estudio sobre el mercado de concentrados y la industria mundial de fundiciones", "resumen": "Analiza las tensiones en el mercado de concentrados por la expansión de capacidad de fundición. Relevante para el debate sobre ENAMI y la fundición en Chile.", "url": "https://www.cochilco.cl/web/cochilco-publica-estudio-sobre-el-mercado-de-concentrados-y-la-industria-mundial-de-fundiciones/", "criticidad": "media", "organismo": "Cochilco", "region": "", "ref": "", "fechaFuente": "2026-09-07", "etiquetas": ["fundiciones", "enami"], "tono": "neutro", "actores": ["Gobierno"], "id": "06872b88273f", "dia": "2026-09-07"}]}, {"fecha": "2026-09-04", "items": [{"fuente": "PJUD", "subfuente": "1º T. Ambiental", "titulo": "Alegatos por reclamaciones atacameñas contra la prospección minera Exploraciones Aida", "resumen": "El 1º Tribunal Ambiental escuchó alegatos en la causa R-159-2026 (acumulada R-161-2026), donde la Comunidad Indígena Atacameña de Toconao y la Asociación Indígena de Regantes impugnan la aprobación de «Exploraciones Aida» de Minera Plata Carina SpA en San Pedro de Atacama, por efectos en aguas subterráneas y sistemas de vida indígena. Precedente clave sobre exigencias a proyectos de sondaje.", "url": "https://1ta.cl/primer-tribunal-ambiental-escucho-alegatos-por-reclamaciones-de-comunidad-y-agricultores-indigenas-atacamenos-contra-aprobacion-de-proyecto-de-prospeccion-miner/", "criticidad": "alta", "organismo": "Primer Tribunal Ambiental", "region": "Antofagasta", "ref": "R-159-2026", "fechaFuente": "2026-09-04", "etiquetas": ["judicialización", "sondajes", "agua"], "id": "d57947d47936", "dia": "2026-09-04"}, {"fuente": "MENCION", "subfuente": "SONAMI", "titulo": "SONAMI llama a suspender los remates de pertenencias mineras mientras se discute la reforma", "resumen": "Comunicado del gremio: pide frenar los remates por patentes impagas mientras el Congreso tramita el cambio al amparo minero, argumentando que continuar genera incertidumbre durante la reforma. SONAMI es la fuente directa.", "url": "https://www.sonami.cl/v2/noticias/sonami-llama-a-suspender-remates-de-pertenencias-mineras-mientras-se-discute-reforma-legal/", "criticidad": "critica", "organismo": "SONAMI", "region": "", "ref": "", "fechaFuente": "2026-09-04", "etiquetas": ["amparo minero", "pequeña minería", "reputación"], "tono": "positivo", "actores": ["SONAMI"], "id": "e315e8c395e5", "dia": "2026-09-04"}]}, {"fecha": "2026-09-03", "items": [{"fuente": "SEA", "subfuente": "Noticias SEA", "titulo": "El SEA informa que en agosto se aprobaron iniciativas por US$12.952 millones", "resumen": "De 37 iniciativas calificadas en agosto de 2026, 36 obtuvieron RCA favorable por US$12.952 millones, principalmente en Energía, Minería e Inmobiliario; Antofagasta concentró US$393 millones en tres proyectos. Referencia gremial sobre el ritmo real de aprobación ambiental.", "url": "https://www.sea.gob.cl/noticias/sea-informa-que-durante-agosto-se-aprobaron-ambientalmente-iniciativas-por-us12952", "criticidad": "info", "organismo": "Servicio de Evaluación Ambiental", "region": "", "ref": "", "fechaFuente": "2026-09-03", "etiquetas": ["permisología", "inversión"], "id": "9efa87cbda63", "dia": "2026-09-03"}, {"fuente": "INST", "subfuente": "ENAMI", "titulo": "Tarifa ENAMI de septiembre: Circular N°47 fija el cobre en 651,059 ¢US$/lb", "resumen": "La tarifa de compra a la pequeña minería de septiembre (03-09-2026) fija el cobre en 651,059 ¢US$/lb, el oro en US$4.404,348/oz y la plata en US$65,156/oz, con un tipo de cambio de $925,25. Referencia directa para los productores socios de SONAMI.", "url": "https://www.sonami.cl/v2/tarifas-enami-sonami/", "criticidad": "media", "organismo": "ENAMI", "region": "", "ref": "Circular N°47", "fechaFuente": "2026-09-03", "etiquetas": ["enami", "tarifas", "pequeña minería"], "id": "3705910865d1", "dia": "2026-09-03"}, {"fuente": "LOBBY", "subfuente": "Subsecretaría de Minería", "titulo": "Sierra Gorda SCM, con el exsubsecretario Rodrigo Benítez, aborda su calificación de empresa estratégica", "resumen": "La gerenta legal Marisol Gómez y Rodrigo Benítez se reunieron con el subsecretario de Minería por las implicancias de calificar a Sierra Gorda como empresa estratégica. Fecha exacta no informada (agosto).", "url": "https://www.redimin.cl/litio-y-grandes-proyectos-marcaron-las-32-reuniones-del-sector-minero-con-autoridades-en-agosto", "criticidad": "media", "organismo": "Subsecretaría de Minería", "region": "Antofagasta", "ref": "Agosto 2026", "fechaFuente": "2026-09-03", "etiquetas": ["lobby", "gran minería", "regulación"], "id": "c5829c2e7cca", "dia": "2026-09-03"}]}, {"fecha": "2026-09-01", "items": [{"fuente": "SEA", "subfuente": "Noticias SEA", "titulo": "El SEA publica el listado de DIA presentadas en agosto de 2026", "resumen": "El SEA publicó el listado de Declaraciones de Impacto Ambiental ingresadas en agosto de 2026. El detalle está solo en el PDF del Diario Oficial enlazado y no fue legible de forma automática, por lo que no se pudo desagregar los proyectos mineros: requiere revisión manual.", "url": "https://www.sea.gob.cl/noticias/sea-publica-listado-de-declaraciones-de-impacto-ambiental-presentadas-en-agosto-de-2026", "criticidad": "info", "organismo": "Servicio de Evaluación Ambiental", "region": "", "ref": "", "fechaFuente": "2026-09-01", "etiquetas": ["permisología", "ingresos seia"], "id": "5d2b0d96e0ef", "dia": "2026-09-01"}, {"fuente": "PJUD", "subfuente": "1º T. Ambiental", "titulo": "Observantes impugnan la negativa del SEA a invalidar la RCA de Prospección Minera Campanario", "resumen": "Reclamación ante el 1º Tribunal Ambiental contra la resolución del SEA que rechazó invalidar la calificación favorable del proyecto Prospección Minera Campanario. Testea la firmeza de las RCA de exploración frente a solicitudes de invalidación de observantes PAC.", "url": "https://1ta.cl/observantes-impugnan-resolucion-del-sea-que-rechazo-invalidar-la-calificacion-favorable-de-proyecto-de-prospeccion-minera-campanario/", "criticidad": "alta", "organismo": "Primer Tribunal Ambiental", "region": "Antofagasta", "ref": "", "fechaFuente": "2026-09-01", "etiquetas": ["judicialización", "permisología", "sondajes"], "id": "d530d264957f", "dia": "2026-09-01"}, {"fuente": "PJUD", "subfuente": "1º T. Ambiental", "titulo": "Comunidades indígenas y comité habitacional reclaman contra proyecto de exploración geológica", "resumen": "Nueva reclamación ante el 1º Tribunal Ambiental contra un proyecto de exploración geológica, presentada por comunidades indígenas y un comité habitacional. Refuerza el patrón de oposición sistemática a la exploración en la macrozona norte.", "url": "https://1ta.cl/comunidades-indigenas-y-comite-habitacional-presentan-reclamacion-contra-proyecto-de-exploracion-geologica/", "criticidad": "media", "organismo": "Primer Tribunal Ambiental", "region": "Antofagasta", "ref": "", "fechaFuente": "2026-09-01", "etiquetas": ["judicialización", "sondajes", "consulta indígena"], "id": "f0d7c154ee51", "dia": "2026-09-01"}, {"fuente": "MENCION", "subfuente": "SONAMI", "titulo": "El sector minero avanza en estandarización de seguridad y salud para el ingreso a faenas", "resumen": "Organizaciones del sector firmaron acuerdos para establecer estándares comunes de inducción y evaluaciones preocupacionales, reduciendo duplicidades y facilitando la movilidad laboral entre faenas.", "url": "https://www.sonami.cl/v2/noticias/sector-minero-avanza-en-estandarizacion-de-seguridad-y-salud-para-ingreso-a-faenas/", "criticidad": "alta", "organismo": "SONAMI", "region": "", "ref": "", "fechaFuente": "2026-09-01", "etiquetas": ["seguridad", "laboral"], "tono": "positivo", "actores": ["SONAMI"], "id": "a6734a4a283c", "dia": "2026-09-01"}, {"fuente": "SEA", "subfuente": "Comité de Ministros", "titulo": "El Comité de Ministros confirma la RCA de Aguas Marítimas (US$5.000 millones) y del Metro a Quillota", "resumen": "En la sesión del 01-09 el Comité desestimó las reclamaciones y ratificó la desaladora Aguas Marítimas en Antofagasta (700.000 m³/día), clave para el agua de la minería regional, y la extensión del Metro de Valparaíso (US$811 millones). Convento Viejo II mantuvo su RCA.", "url": "https://www.reporteminero.cl/noticia/noticias/2026/09/comite-ministros-confirma-rca-proyectos-inversion-aguas-maritimas-metro-valparaiso", "criticidad": "alta", "organismo": "Comité de Ministros (SEA)", "region": "Antofagasta", "ref": "Sesión ordinaria 10/2026", "fechaFuente": "2026-09-01", "etiquetas": ["comité de ministros", "agua", "rca"], "id": "fcb8570170e3", "dia": "2026-09-01"}]}]}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var FUENTES = [
+    {id:"DO",       nm:"Diario Oficial",   dsc:"Leyes, decretos, Boletín de Minería"},
+    {id:"LEG",      nm:"Congreso",         dsc:"Senado y Cámara de Diputados"},
+    {id:"REG",      nm:"Reglamentos",      dsc:"Contraloría, Consejo de Ministros, consultas"},
+    {id:"SEA",      nm:"SEA / SEIA",       dsc:"PAC, Comité de Ministros y conflictos"},
+    {id:"SMA",      nm:"SMA / SNIFA",      dsc:"Sanciones y fiscalización"},
+    {id:"PJUD",     nm:"Judicial",         dsc:"T. Ambientales y TDLC"},
+    {id:"INST",     nm:"Organismos",       dsc:"ENAMI, SERNAGEOMIN, DGA, CMF"},
+    {id:"SEC",      nm:"SEC",              dsc:"Cargos, normas y suministro"},
+    {id:"SENAPRED", nm:"SENAPRED y clima", dsc:"Alertas, sismos y pronóstico en faenas"},
+    {id:"LOBBY",    nm:"Ley de Lobby",     dsc:"Audiencias con autoridades"},
+    {id:"MENCION",  nm:"Prensa y opinión", dsc:"Medios, gremios y encuestas"},
+    {id:"RRSS",     nm:"Redes sociales",   dsc:"X, LinkedIn, Facebook, Instagram"}
+  ];
+  var TONOS = ["positivo","neutro","negativo"];
+  var ACTORES = ["SONAMI","Consejo Minero","APRIMIN","Gobierno","Codelco","Empresas","ONG"];
+  var SEV = ["critica","alta","media","info"];
+  var SEVLBL = {critica:"Crítica", alta:"Alta", media:"Media", info:"Info"};
+
+  var state = {
+    days: [],            // [{fecha, items[], estadoFuentes[]}]
+    fuentes: {},         // id -> bool (selected)
+    crit: "all",
+    rango: 7,
+    q: "",
+    tag: "",
+    ready: false,
+    db: null
+  };
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;");
+  }
+  function safeUrl(u){
+    var s = String(u || "");
+    return /^https?:\/\//i.test(s) ? s : "";
+  }
+  function todayISO(){
+    // Chile time (UTC-3 / UTC-4). Use the viewer's own clock but anchor to Santiago.
+    try{
+      return new Intl.DateTimeFormat("en-CA",{timeZone:"America/Santiago",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+    }catch(e){ return new Date().toISOString().slice(0,10); }
+  }
+  function fmtDay(iso){
+    var p = String(iso||"").split("-");
+    if(p.length !== 3) return iso || "";
+    var d = new Date(Date.UTC(+p[0], +p[1]-1, +p[2]));
+    var dias = ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+    var mes = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+    return dias[d.getUTCDay()] + " " + d.getUTCDate() + " de " + mes[d.getUTCMonth()];
+  }
+  function daysAgo(iso){
+    var p = String(iso||"").split("-");
+    if(p.length !== 3) return 9999;
+    var t = Date.UTC(+p[0], +p[1]-1, +p[2]);
+    var q = todayISO().split("-");
+    var n = Date.UTC(+q[0], +q[1]-1, +q[2]);
+    return Math.round((n - t) / 86400000);
+  }
+
+  /* ---------- data shaping ---------- */
+  function allItems(){
+    var out = [];
+    for(var i=0;i<state.days.length;i++){
+      var d = state.days[i];
+      var list = Array.isArray(d.items) ? d.items : [];
+      for(var j=0;j<list.length;j++){
+        var it = list[j];
+        if(!it || typeof it !== "object") continue;
+        out.push({
+          dia: d.fecha,
+          fuente: String(it.fuente||"MENCION").toUpperCase(),
+          subfuente: it.subfuente || "",
+          titulo: it.titulo || "(sin título)",
+          resumen: it.resumen || "",
+          url: safeUrl(it.url),
+          criticidad: SEV.indexOf(String(it.criticidad||"").toLowerCase()) >= 0 ? String(it.criticidad).toLowerCase() : "info",
+          organismo: it.organismo || "",
+          region: it.region || "",
+          ref: it.ref || "",
+          fechaFuente: it.fechaFuente || d.fecha,
+          etiquetas: Array.isArray(it.etiquetas) ? it.etiquetas.slice(0,8) : [],
+          estado: it.estado === "cerrada" ? "cerrada" : "",
+          tono: TONOS.indexOf(String(it.tono||"")) >= 0 ? String(it.tono) : "",
+          actores: Array.isArray(it.actores) ? it.actores.map(String).slice(0,8) : []
+        });
+      }
+    }
+    return out;
+  }
+
+  function passRango(it){
+    if(!state.rango) return true;
+    return daysAgo(it.dia) < state.rango;
+  }
+  function passCrit(it){ return state.crit === "all" || it.criticidad === state.crit; }
+  function passFuente(it){
+    var any = false, k;
+    for(k in state.fuentes){ if(state.fuentes[k]){ any = true; break; } }
+    return any ? !!state.fuentes[it.fuente] : true;
+  }
+  function passTag(it){
+    return !state.tag || it.etiquetas.indexOf(state.tag) >= 0;
+  }
+  function passQ(it){
+    if(!state.q) return true;
+    var hay = (it.titulo+" "+it.resumen+" "+it.organismo+" "+it.region+" "+it.ref+" "+it.subfuente+" "+it.etiquetas.join(" ")).toLowerCase();
+    return hay.indexOf(state.q) >= 0;
+  }
+
+  /* ---------- render ---------- */
+  function render(){
+    var items = allItems();
+    var scoped = items.filter(passRango);                 // for source tile counts
+    var shown  = scoped.filter(function(it){ return passCrit(it) && passFuente(it) && passQ(it) && passTag(it); });
+
+    // topline
+    $("nTotal").textContent = shown.length;
+    $("nCrit").textContent  = shown.filter(function(i){return i.criticidad==="critica";}).length;
+    $("nAlta").textContent  = shown.filter(function(i){return i.criticidad==="alta";}).length;
+    var t = todayISO();
+    $("nHoy").textContent = items.filter(function(i){ return i.dia === t; }).length;
+
+    renderAttention(items);
+    renderSources(scoped);
+    renderTopics(scoped);
+    renderOpinion(scoped);
+    renderFeed(shown);
+    renderStatus();
+
+    var dirty = state.q || state.tag || state.crit !== "all" || state.rango !== 7 || Object.keys(state.fuentes).some(function(k){return state.fuentes[k];});
+    $("clearall").hidden = !dirty;
+  }
+
+  function renderSources(scoped){
+    var host = $("sources");
+    var byF = {};
+    scoped.forEach(function(it){
+      var b = byF[it.fuente] || (byF[it.fuente] = {n:0, critica:0, alta:0, media:0, info:0});
+      b.n++; b[it.criticidad]++;
+    });
+    var estado = {};
+    if(state.days.length && Array.isArray(state.days[0].estadoFuentes)){
+      state.days[0].estadoFuentes.forEach(function(e){ if(e && e.fuente) estado[e.fuente] = e; });
+    }
+
+    host.innerHTML = FUENTES.map(function(f){
+      var b = byF[f.id] || {n:0, critica:0, alta:0, media:0, info:0};
+      var on = !!state.fuentes[f.id];
+      var e = estado[f.id];
+      var bad = e && e.estado === "error";
+      var pending = f.id === "RRSS" && !b.n && (!e || e.estado === "error");
+      var bar = "";
+      if(b.n){
+        bar = '<div class="bar">' + SEV.map(function(s){
+          return b[s] ? '<span style="flex:'+b[s]+'; background:var(--'+(s==="critica"?"crit":s==="alta"?"alta":s==="media"?"media":"info")+')"></span>' : "";
+        }).join("") + '</div>';
+      }
+      if(pending){
+        return '<button class="src pending" data-f="'+f.id+'" data-pending="1" aria-pressed="false" title="Ver cómo activar este canal">' +
+               '<span class="row1"><span class="nm">'+esc(f.nm)+'</span></span>' +
+               '<span class="dsc">'+esc(f.dsc)+'</span><span class="ct">Por conectar →</span></button>';
+      }
+      return '<button class="src'+(bad?" err":"")+'" data-f="'+f.id+'" aria-pressed="'+on+'"'+
+             (bad ? ' title="'+esc(e.detalle||"La última barrida no pudo leer esta fuente")+'"' : '')+'>' +
+             '<span class="row1"><span class="nm">'+(bad ? '<span class="flag"></span>' : '')+esc(f.nm)+'</span><span class="ct">'+b.n+'</span></span>' +
+             '<span class="dsc">'+esc(f.dsc)+'</span>' + bar +
+             '</button>';
+    }).join("");
+  }
+
+  function renderAttention(items){
+    var crit = items.filter(function(i){ return i.criticidad === "critica" && i.estado !== "cerrada" && daysAgo(i.dia) < 7; });
+    crit.sort(function(a,b){ return a.dia < b.dia ? 1 : a.dia > b.dia ? -1 : 0; });
+    var box = $("attn");
+    if(!crit.length){ box.hidden = true; return; }
+    box.hidden = false;
+    $("attnN").textContent = crit.length + (crit.length === 1 ? " hallazgo" : " hallazgos");
+    $("attnList").innerHTML = crit.slice(0,6).map(function(it){
+      var f = FUENTES.filter(function(x){return x.id===it.fuente;})[0];
+      var t = it.url ? '<a href="'+esc(it.url)+'" target="_blank" rel="noopener noreferrer">'+esc(it.titulo)+'</a>' : esc(it.titulo);
+      return '<li><span class="who">'+esc(f ? f.nm : it.fuente)+'</span><span class="what">'+t+'</span><span class="d">'+esc(it.fechaFuente)+'</span></li>';
+    }).join("");
+  }
+
+  function renderTopics(scoped){
+    var c = {};
+    scoped.forEach(function(it){ it.etiquetas.forEach(function(t){ t = String(t).toLowerCase(); c[t] = (c[t]||0) + 1; }); });
+    var top = Object.keys(c).sort(function(a,b){ return c[b]-c[a] || (a<b?-1:1); }).slice(0,14);
+    if(state.tag && top.indexOf(state.tag) < 0 && c[state.tag]) top.push(state.tag);
+    $("topics").innerHTML = top.length ? top.map(function(t){
+      return '<button class="topic" data-t="'+esc(t)+'" aria-pressed="'+(state.tag===t)+'">'+esc(t)+' <b>'+c[t]+'</b></button>';
+    }).join("") : '<span class="hint" style="font-size:12px;color:var(--ink-3)">Sin etiquetas en este rango.</span>';
+  }
+
+  function renderOpinion(scoped){
+    var ms = scoped.filter(function(i){ return (i.fuente === "MENCION" || i.fuente === "RRSS") && i.tono; });
+    var tb = $("toneBox");
+    if(!ms.length){
+      tb.innerHTML = '<div class="empty">Sin menciones clasificadas en este rango.</div>';
+      $("sovBox").innerHTML = '<div class="empty">Sin datos.</div>';
+      return;
+    }
+    var c = {positivo:0, neutro:0, negativo:0};
+    ms.forEach(function(i){ c[i.tono]++; });
+    var n = ms.length, pc = function(k){ return Math.round(100 * c[k] / n); };
+    tb.innerHTML = '<div class="tonebar" role="img" aria-label="'+pc("positivo")+'% positivo, '+pc("neutro")+'% neutro, '+pc("negativo")+'% negativo">' +
+      '<span class="tone-pos" style="flex:'+c.positivo+'"></span><span class="tone-neu" style="flex:'+c.neutro+'"></span><span class="tone-neg" style="flex:'+c.negativo+'"></span></div>' +
+      '<div class="tonelegend">' +
+      '<span><i class="tone-pos"></i>Positivo <b>'+pc("positivo")+'%</b> ('+c.positivo+')</span>' +
+      '<span><i class="tone-neu"></i>Neutro <b>'+pc("neutro")+'%</b> ('+c.neutro+')</span>' +
+      '<span><i class="tone-neg"></i>Negativo <b>'+pc("negativo")+'%</b> ('+c.negativo+')</span></div>';
+    $("toneSub").textContent = n + " menciones clasificadas, hacia la minería y SONAMI";
+    var negs = ms.filter(function(i){ return i.tono === "negativo"; })
+      .sort(function(x,y){ return SEV.indexOf(x.criticidad) - SEV.indexOf(y.criticidad) || (x.dia < y.dia ? 1 : -1); }).slice(0,4);
+    if(negs.length){
+      tb.innerHTML += '<div class="negs"><div class="h">Cobertura negativa a vigilar</div>' + negs.map(function(i){
+        var t = esc(i.titulo) + '<em>' + esc(i.subfuente || "") + '</em>';
+        return i.url ? '<a href="'+esc(i.url)+'" target="_blank" rel="noopener noreferrer">'+t+'</a>' : '<span class="t">'+t+'</span>';
+      }).join("") + '</div>';
+    }
+    var a = {};
+    ACTORES.forEach(function(k){ a[k] = 0; });
+    ms.forEach(function(i){ i.actores.forEach(function(k){ if(a[k] != null) a[k]++; }); });
+    var max = Math.max.apply(null, ACTORES.map(function(k){ return a[k]; }).concat([1]));
+    $("sovBox").innerHTML = ACTORES.slice().sort(function(x,y){ return a[y]-a[x]; }).map(function(k){
+      return '<div class="sovrow'+(k==="SONAMI"?" me":"")+'"><span class="n">'+esc(k)+'</span><span class="t"><span style="width:'+(100*a[k]/max)+'%"></span></span><span class="c">'+a[k]+'</span></div>';
+    }).join("");
+  }
+
+  var IND = null;
+  function fmtNum(v, id){
+    if(typeof v !== "number" || !isFinite(v)) return "—";
+    var dec = (id === "dolar" || id === "uf" || id === "litio") ? (id === "uf" ? 2 : 0) : 2;
+    if(id === "oro" || id === "litio") dec = 0;
+    return v.toLocaleString("es-CL", {minimumFractionDigits:dec, maximumFractionDigits:dec});
+  }
+  function renderIndicators(){
+    var box = $("ticker"), meta = $("tickmeta");
+    if(!IND || !Array.isArray(IND.valores) || !IND.valores.length){ box.hidden = true; meta.hidden = true; return; }
+    var hist = IND.historia || {};
+    box.innerHTML = IND.valores.slice(0,7).map(function(v){
+      var d = "";
+      var h = hist[v.id];
+      if(Array.isArray(h) && h.length >= 2){
+        var a = +h[h.length-2][1], b = +h[h.length-1][1];
+        if(a && isFinite(a) && isFinite(b)){
+          var pct = (b - a) / a * 100;
+          d = '<div class="d '+(pct>0?"up":pct<0?"dn":"")+'">'+(pct>0?"▲ ":pct<0?"▼ ":"")+Math.abs(pct).toFixed(1).replace(".",",")+'%</div>';
+        }
+      }
+      return '<div class="tk" title="'+esc(v.fuente||"")+'"><div class="l">'+esc(v.nombre)+'</div>' +
+             '<div class="v">'+fmtNum(+v.valor, v.id)+'<span class="u">'+esc(v.unidad||"")+'</span></div>'+d+'</div>';
+    }).join("");
+    box.hidden = false;
+    meta.hidden = false;
+    meta.textContent = "Indicadores al " + (IND.fecha || "") + " · cobre y dólar: mindicador.cl · metales preciosos: gold-api.com · molibdeno referencial";
+  }
+
+  var CLIMA = null;
+  function renderClima(){
+    var z = $("climaZone");
+    if(!CLIMA || !Array.isArray(CLIMA.puntos) || !CLIMA.puntos.length){ z.hidden = true; return; }
+    var dn = ["dom","lun","mar","mié","jue","vie","sáb"];
+    $("climaBox").innerHTML = CLIMA.puntos.slice(0,10).map(function(p){
+      var warn = false;
+      var rows = (p.dias || []).slice(0,3).map(function(d){
+        var f = String(d[0]).split("-"), wd = new Date(Date.UTC(+f[0], +f[1]-1, +f[2])).getUTCDay();
+        var tx = +d[1], tn = +d[2], pr = +d[3];
+        var snow = pr >= 1 && tn < 1;
+        if(snow || pr >= 10 || +d[4] >= 17) warn = true;
+        return '<tr><td class="dd">'+dn[wd]+' '+(+f[2])+'</td><td>'+Math.round(tx)+'°/'+Math.round(tn)+'°</td>' +
+               '<td class="pp'+(pr>=1?" wet":"")+'">'+(snow?'<span class="snow">nieve </span>':'')+pr.toFixed(1).replace(".",",")+'</td></tr>';
+      }).join("");
+      return '<div class="cp'+(warn?" warn":"")+'"><div class="pn">'+esc(p.punto)+'</div><div class="pr">'+esc(p.region||"")+'</div><table>'+rows+'</table></div>';
+    }).join("");
+    $("climaHint").textContent = "Pronóstico a 3 días al " + (CLIMA.fecha || "") + " · máx/mín °C · precipitación mm · " + (CLIMA.fuente || "");
+    z.hidden = false;
+  }
+
+  function renderFeed(shown){
+    var zone = $("feedZone");
+    if(!state.ready){ return; }
+
+    if(!state.days.length){
+      zone.innerHTML = '<div class="panel"><h3>El radar aún no tiene corridas</h3>'+
+        '<p>La primera barrida automática se ejecuta a las 09:30 hora de Chile. En cuanto corra, los hallazgos de las siete fuentes aparecerán aquí ordenados por día y criticidad.</p></div>';
+      return;
+    }
+    if(!shown.length){
+      zone.innerHTML = '<div class="panel"><h3>Sin hallazgos con estos filtros</h3>'+
+        '<p>Prueba ampliando el rango de fechas o quitando el filtro de criticidad.</p></div>';
+      return;
+    }
+
+    shown.sort(function(a,b){
+      if(a.dia !== b.dia) return a.dia < b.dia ? 1 : -1;
+      return SEV.indexOf(a.criticidad) - SEV.indexOf(b.criticidad);
+    });
+
+    var html = '<div class="feed">';
+    var cur = null;
+    shown.forEach(function(it){
+      if(it.dia !== cur){
+        cur = it.dia;
+        var rel = daysAgo(cur);
+        var relTxt = rel === 0 ? "hoy" : rel === 1 ? "ayer" : "hace " + rel + " días";
+        html += '<div class="daysep"><span>'+esc(fmtDay(cur))+' · '+relTxt+'</span></div>';
+      }
+      var f = FUENTES.filter(function(x){return x.id===it.fuente;})[0];
+      html += '<article class="item k-'+it.criticidad+'">';
+      html += '<div class="meta">';
+      html += '<span class="chip sev '+it.criticidad+'">'+SEVLBL[it.criticidad]+'</span>';
+      html += '<span class="chip">'+esc(f ? f.nm : it.fuente)+'</span>';
+      if(it.subfuente) html += '<span class="chip org">'+esc(it.subfuente)+'</span>';
+      if(it.region) html += '<span class="chip org">'+esc(it.region)+'</span>';
+      if(it.tono) html += '<span class="chip tono '+it.tono+'">'+esc(it.tono)+'</span>';
+      if(it.estado === "cerrada") html += '<span class="chip org">cerrada</span>';
+      html += '<span class="when">'+esc(it.fechaFuente)+'</span>';
+      html += '</div>';
+      html += '<h3>' + (it.url ? '<a href="'+esc(it.url)+'" target="_blank" rel="noopener noreferrer">'+esc(it.titulo)+'</a>' : esc(it.titulo)) + '</h3>';
+      if(it.resumen) html += '<p>'+esc(it.resumen)+'</p>';
+      if(it.etiquetas.length){
+        html += '<div class="tags">'+it.etiquetas.map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join("")+'</div>';
+      }
+      var refbits = [];
+      if(it.organismo) refbits.push(esc(it.organismo));
+      if(it.ref) refbits.push(esc(it.ref));
+      if(it.url) refbits.push('<a href="'+esc(it.url)+'" target="_blank" rel="noopener noreferrer">ver fuente ↗</a>');
+      if(refbits.length) html += '<div class="ref">'+refbits.map(function(b){return '<span>'+b+'</span>';}).join("")+'</div>';
+      html += '</article>';
+    });
+    html += '</div>';
+    zone.innerHTML = html;
+  }
+
+  function renderStatus(){
+    var last = state.days[0];
+    var grid = $("statusgrid"), head = $("statusHead");
+    if(!last || !Array.isArray(last.estadoFuentes) || !last.estadoFuentes.length){
+      grid.hidden = true; head.hidden = true; return;
+    }
+    grid.hidden = false; head.hidden = false;
+    grid.innerHTML = last.estadoFuentes.map(function(e){
+      var cls = e.estado === "ok" ? "" : (e.estado === "parcial" ? "warn" : "down");
+      var f = FUENTES.filter(function(x){return x.id===e.fuente;})[0];
+      return '<div class="st '+cls+'"><i></i><div><div class="t">'+esc(f ? f.nm : e.fuente)+'</div>'+
+             '<div class="d">'+esc(e.detalle || (e.estado==="ok" ? "Leída correctamente" : "Sin respuesta"))+'</div></div></div>';
+    }).join("");
+  }
+
+  function setStamp(){
+    var last = state.days[0];
+    var p = $("pulse"), txt = $("pulseTxt");
+    if(!last){
+      p.className = "pulse off"; txt.textContent = "Sin corridas";
+      $("stamp").textContent = "—";
+      return;
+    }
+    var ago = daysAgo(last.fecha);
+    p.className = "pulse" + (ago <= 1 ? "" : ago <= 3 ? " stale" : " off");
+    txt.textContent = ago === 0 ? "Al día" : ago === 1 ? "Ayer" : "Hace " + ago + " días";
+    var rev = last.ultimaRevision || last.generado;
+    $("stamp").textContent = "Última revisión " + last.fecha + (rev ? " · " + String(rev).slice(11,16) + " hrs" : "") + (last.ultimaRevision && last.generado ? " · barrida completa " + String(last.generado).slice(11,16) : "");
+  }
+
+  /* ---------- events ---------- */
+  $("sources").addEventListener("click", function(ev){
+    var b = ev.target.closest("button[data-f]");
+    if(!b) return;
+    if(b.getAttribute("data-pending")){
+      var s = $("rrssSetup"); s.hidden = !s.hidden;
+      if(!s.hidden) s.scrollIntoView({behavior:"smooth", block:"nearest"});
+      return;
+    }
+    var id = b.getAttribute("data-f");
+    state.fuentes[id] = !state.fuentes[id];
+    render();
+  });
+  $("topics").addEventListener("click", function(ev){
+    var b = ev.target.closest("button[data-t]"); if(!b) return;
+    var t = b.getAttribute("data-t");
+    state.tag = state.tag === t ? "" : t;
+    render();
+  });
+  $("segRango").addEventListener("click", function(ev){
+    var b = ev.target.closest("button[data-r]"); if(!b) return;
+    state.rango = +b.getAttribute("data-r");
+    [].forEach.call(this.querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    render();
+  });
+  $("segCrit").addEventListener("click", function(ev){
+    var b = ev.target.closest("button[data-c]"); if(!b) return;
+    state.crit = b.getAttribute("data-c");
+    [].forEach.call(this.querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+    render();
+  });
+  var qt;
+  $("q").addEventListener("input", function(){
+    var v = this.value.toLowerCase().trim();
+    clearTimeout(qt);
+    qt = setTimeout(function(){ state.q = v; render(); }, 140);
+  });
+  $("clearall").addEventListener("click", function(){
+    state.q = ""; $("q").value = "";
+    state.crit = "all"; state.rango = 7; state.fuentes = {}; state.tag = "";
+    [].forEach.call($("segCrit").querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-c")==="all" ? "true":"false"); });
+    [].forEach.call($("segRango").querySelectorAll("button"), function(x){ x.setAttribute("aria-pressed", x.getAttribute("data-r")==="7" ? "true":"false"); });
+    render();
+  });
+
+  /* ---------- Excel export ---------- */
+  var downloads = null;
+  function toast(m){ $("toast").textContent = m; if(m) setTimeout(function(){ if($("toast").textContent===m) $("toast").textContent=""; }, 5000); }
+  function buildWorkbook(){
+    var XLSX = window.XLSX;
+    var items = allItems().filter(function(it){ return passRango(it) && passCrit(it) && passFuente(it) && passQ(it) && passTag(it); });
+    items.sort(function(a,b){ return a.dia < b.dia ? 1 : a.dia > b.dia ? -1 : SEV.indexOf(a.criticidad) - SEV.indexOf(b.criticidad); });
+    var head = ["Día detección","Fecha fuente","Fuente","Subfuente","Criticidad","Título","Resumen","Organismo / medio","Región","Referencia","Etiquetas","Tono","Actores","URL"];
+    function row(it){
+      var f = FUENTES.filter(function(x){return x.id===it.fuente;})[0];
+      return [it.dia, it.fechaFuente, f ? f.nm : it.fuente, it.subfuente, SEVLBL[it.criticidad], it.titulo, it.resumen, it.organismo, it.region, it.ref, it.etiquetas.join(", "), it.tono, it.actores.join(", "), it.url];
+    }
+    var wb = XLSX.utils.book_new();
+    // Resumen
+    var res = [["Radar SONAMI — exportación"],["Generado", new Date().toLocaleString("es-CL",{timeZone:"America/Santiago"})],
+      ["Rango", state.rango ? ("Últimos " + state.rango + " días") : "Todo el historial"],["Hallazgos", items.length],[],
+      ["Fuente","Total","Crítica","Alta","Media","Info"]];
+    FUENTES.forEach(function(f){
+      var l = items.filter(function(i){return i.fuente===f.id;});
+      res.push([f.nm, l.length].concat(SEV.map(function(s){ return l.filter(function(i){return i.criticidad===s;}).length; })));
+    });
+    var ws = XLSX.utils.aoa_to_sheet(res); ws["!cols"] = [{wch:22},{wch:10},{wch:9},{wch:9},{wch:9},{wch:9}];
+    XLSX.utils.book_append_sheet(wb, ws, "Resumen");
+    var cols = [{wch:12},{wch:12},{wch:15},{wch:20},{wch:10},{wch:60},{wch:80},{wch:30},{wch:16},{wch:26},{wch:28},{wch:10},{wch:22},{wch:50}];
+    var all = XLSX.utils.aoa_to_sheet([head].concat(items.map(row))); all["!cols"] = cols; all["!autofilter"] = {ref: all["!ref"]};
+    XLSX.utils.book_append_sheet(wb, all, "Todos");
+    FUENTES.forEach(function(f){
+      var l = items.filter(function(i){return i.fuente===f.id;});
+      if(!l.length) return;
+      var w = XLSX.utils.aoa_to_sheet([head].concat(l.map(row))); w["!cols"] = cols; w["!autofilter"] = {ref: w["!ref"]};
+      XLSX.utils.book_append_sheet(wb, w, f.nm.replace(/[\\\/\?\*\[\]:]/g,"-").slice(0,31));
+    });
+    return XLSX.write(wb, {bookType:"xlsx", type:"array"});
+  }
+  $("xlsxBtn").addEventListener("click", function(){
+    if(!downloads || !window.XLSX) return;
+    var btn = this; btn.disabled = true;
+    try{
+      var buf = buildWorkbook();
+      downloads.save({filename: "Radar-SONAMI-" + todayISO() + ".xlsx", data: new Blob([buf])})
+        .then(function(){ toast("Excel descargado"); })
+        ["catch"](function(e){
+          var c = e && e.code;
+          if(c === "declined") toast("");
+          else if(c === "rate_limited") toast("Ya hay una descarga pendiente");
+          else { toast("La descarga no está disponible aquí"); if(c === "unavailable" || c === "not_granted") btn.hidden = true; }
+        })
+        .then(function(){ btn.disabled = false; });
+    }catch(err){ btn.disabled = false; toast("No se pudo generar el Excel"); }
+  });
+  if(window.claude && window.claude.use){
+    window.claude.use("downloads").then(function(d){
+      downloads = d;
+      if(d && window.XLSX) $("xlsxBtn").hidden = false;
+    })["catch"](function(){});
+  } else {
+    // Standalone site (outside Claude): plain browser download.
+    downloads = {save: function(o){
+      return new Promise(function(res){
+        var url = URL.createObjectURL(o.data), a = document.createElement("a");
+        a.href = url; a.download = o.filename; document.body.appendChild(a); a.click();
+        setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 1000);
+        res({status:"saved"});
+      });
+    }};
+    if(window.XLSX) $("xlsxBtn").hidden = false;
+  }
+
+  /* ---------- boot ---------- */
+  function ingest(snap){
+    var days = [];
+    snap.docs.forEach(function(d){
+      var v = d.data() || {};
+      days.push({
+        fecha: v.fecha || d.id,
+        generado: v.generado || "",
+        ultimaRevision: v.ultimaRevision || "",
+        items: Array.isArray(v.items) ? v.items : [],
+        estadoFuentes: Array.isArray(v.estadoFuentes) ? v.estadoFuentes : []
+      });
+    });
+    days.sort(function(a,b){ return a.fecha < b.fecha ? 1 : a.fecha > b.fecha ? -1 : 0; });
+    state.days = days;
+    state.ready = true;
+    setStamp();
+    render();
+  }
+
+  function offline(msg){
+    state.ready = true;
+    setStamp();
+    $("feedZone").innerHTML = '<div class="panel"><h3>No se pudo abrir el almacén de datos</h3><p>'+esc(msg)+'</p></div>';
+    $("pulse").className = "pulse off";
+    $("pulseTxt").textContent = "Sin conexión";
+    renderSources([]);
+  }
+
+  /* ---------- distribution list (editors only) ---------- */
+  var distRef = null, distState = {destinatarios:[]};
+  function renderMails(){
+    var host = $("mails"); host.innerHTML = "";
+    if(!distState.destinatarios.length){
+      var e = document.createElement("span"); e.className = "distmsg"; e.textContent = "Sin destinatarios todavía.";
+      host.appendChild(e); return;
+    }
+    distState.destinatarios.forEach(function(m){
+      var chip = document.createElement("span"); chip.className = "mail";
+      var t = document.createElement("span"); t.textContent = m; chip.appendChild(t);
+      var b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-label","Quitar " + m); b.textContent = "×";
+      b.addEventListener("click", function(){ saveMails(distState.destinatarios.filter(function(x){ return x !== m; }), "Quitado: " + m); });
+      chip.appendChild(b); host.appendChild(chip);
+    });
+  }
+  var saving = false;
+  function saveMails(list, okMsg){
+    if(!distRef || saving) return;
+    saving = true;
+    distRef.set({destinatarios:list, actualizado: todayISO()}).then(function(){
+      $("distmsg").textContent = okMsg;
+    })["catch"](function(e){
+      $("distmsg").textContent = (e && e.code === "invalid_argument") ? "No tienes permiso para editar la lista." : "No se pudo guardar. Intenta de nuevo.";
+    }).then(function(){ saving = false; });
+  }
+  $("addmail").addEventListener("submit", function(ev){
+    ev.preventDefault();
+    var v = $("newmail").value.trim().toLowerCase();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)){ $("distmsg").textContent = "Escribe un correo válido, por ejemplo nombre@empresa.cl"; return; }
+    if(distState.destinatarios.indexOf(v) >= 0){ $("distmsg").textContent = "Ese correo ya está en la lista."; return; }
+    if(distState.destinatarios.length >= 40){ $("distmsg").textContent = "La lista admite hasta 40 destinatarios."; return; }
+    $("newmail").value = "";
+    saveMails(distState.destinatarios.concat([v]), "Agregado: " + v);
+  });
+
+  function startDb(db){
+    state.db = db;
+    db.collection("dias").orderBy("fecha","desc").limit(90).onSnapshot(ingest, function(e){
+      offline("El almacén respondió con un error (" + esc(e && e.code) + "). Recarga la página en unos minutos.");
+    });
+    db.doc("indicadores/actual").onSnapshot(function(snap){
+      IND = snap.exists ? snap.data() : null; renderIndicators();
+    }, function(){});
+    db.doc("clima/actual").onSnapshot(function(snap){
+      CLIMA = snap.exists ? snap.data() : null; renderClima();
+    }, function(){});
+    window.claude.use("user").then(function(u){
+      if(!u) return;
+      return u.canEdit().then(function(ok){
+        if(!ok) return;
+        $("distZone").hidden = false;
+        distRef = db.doc("config/distribucion");
+        distRef.onSnapshot(function(snap){
+          var d = snap.exists ? snap.data() : null;
+          distState = {destinatarios: d && Array.isArray(d.destinatarios) ? d.destinatarios.map(String) : []};
+          renderMails();
+        }, function(){});
+      });
+    })["catch"](function(){});
+  }
+
+  var EMB = null;
+  try{
+    var embEl = document.getElementById("radar-data");
+    if(embEl) EMB = JSON.parse(embEl.textContent || "null");
+  }catch(e){ EMB = null; }
+
+  if(EMB && Array.isArray(EMB.dias)){
+    // Public read-only mirror: data travels inside the page.
+    var mb = $("mirrorbar");
+    mb.hidden = false;
+    mb.textContent = "Versión pública de solo lectura del Radar SONAMI. Se actualiza cada mañana después de la barrida de las 09:30" + (EMB.publicado ? " · última actualización " + String(EMB.publicado).slice(0,16).replace("T"," ") : "") + ".";
+    IND = EMB.indicadores || null;
+    renderIndicators();
+    CLIMA = EMB.clima || null;
+    renderClima();
+    ingest({docs: EMB.dias.map(function(d){ return {id: d.fecha, data: function(){ return d; }}; })});
+  } else if(window.claude && window.claude.use){
+    window.claude.use("db").then(function(db){
+      if(!db){ offline("Esta vista no tiene acceso al almacén compartido del radar. Ábrelo desde tu cuenta de Claude para ver los hallazgos."); return; }
+      startDb(db);
+    })["catch"](function(){ offline("No fue posible inicializar el almacén de datos."); });
+  } else {
+    offline("Esta página necesita ejecutarse dentro de Claude para leer los hallazgos.");
+  }
+
+  // If nothing answers within 12s, stop showing the loading panel.
+  setTimeout(function(){
+    if(!state.ready) offline("El almacén de datos no respondió. Recarga la página.");
+  }, 12000);
+})();
+</script>
+
+</body>
+</html>
